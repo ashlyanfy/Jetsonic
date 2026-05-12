@@ -1,0 +1,145 @@
+// Jetsonic Trading FZCO — backend database schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Auth ----------
+
+enum Role {
+  ADMIN
+  MANAGER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(MANAGER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notes  LeadNote[]
+  audits AuditLog[]
+}
+
+// ---------- CRM (Leads) ----------
+
+enum LeadStatus {
+  NEW
+  IN_PROGRESS
+  PLANNED
+  REJECTED
+  CONVERTED
+}
+
+model Lead {
+  id               Int        @id @default(autoincrement())
+  requestType      String?
+  urgency          String?
+  name             String
+  company          String?
+  role             String?
+  email            String
+  phone            String?
+  partNumber       String?
+  altPartNumber    String?
+  ataChapter       String?
+  aircraftType     String?
+  tailNumber       String?
+  quantity         String?
+  condition        String?
+  certificate      String?
+  targetDate       DateTime?
+  deliveryLocation String?
+  message          String?
+  attachmentUrl    String?
+  source           String?
+  ip               String?
+  userAgent        String?
+  status           LeadStatus @default(NEW)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  notes LeadNote[]
+
+  @@index([status, createdAt])
+}
+
+model LeadNote {
+  id        Int      @id @default(autoincrement())
+  leadId    Int
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  lead   Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id])
+}
+
+// ---------- CMS ----------
+
+model Page {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  updatedAt DateTime @updatedAt
+
+  blocks Block[]
+  seo    Seo?
+}
+
+model Block {
+  id      Int     @id @default(autoincrement())
+  pageId  Int
+  type    String
+  order   Int
+  enabled Boolean @default(true)
+  data    Json
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, order])
+}
+
+model Seo {
+  id          Int     @id @default(autoincrement())
+  pageId      Int     @unique
+  title       String
+  description String
+  keywords    String?
+  ogImage     String?
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
+
+model Media {
+  id        Int      @id @default(autoincrement())
+  url       String
+  filename  String
+  mime      String
+  size      Int
+  createdAt DateTime @default(now())
+}
+
+// ---------- Audit ----------
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  action    String
+  entity    String
+  entityId  String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}

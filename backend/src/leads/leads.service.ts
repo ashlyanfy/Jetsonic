@@ -1,0 +1,139 @@
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Lead, Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateLeadDto } from './dto/create-lead.dto';
+import { ListLeadsDto } from './dto/list-leads.dto';
+import { UpdateLeadDto } from './dto/update-lead.dto';
+
+interface CreateLeadContext {
+  ip?: string;
+  userAgent?: string;
+  attachmentUrl?: string;
+}
+
+@Injectable()
+export class LeadsService {
+  private readonly logger = new Logger(LeadsService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(dto: CreateLeadDto, ctx: CreateLeadContext): Promise<Lead> {
+    const lead = await this.prisma.lead.create({
+      data: {
+        name: dto.name,
+        email: dto.email,
+        company: dto.company,
+        role: dto.role,
+        phone: dto.phone,
+        requestType: dto.requestType,
+        urgency: dto.urgency,
+        partNumber: dto.partNumber,
+        altPartNumber: dto.altPartNumber,
+        ataChapter: dto.ataChapter,
+        aircraftType: dto.aircraftType,
+        tailNumber: dto.tailNumber,
+        quantity: dto.quantity,
+        condition: dto.condition,
+        certificate: dto.certificate,
+        targetDate: dto.targetDate ? new Date(dto.targetDate) : null,
+        deliveryLocation: dto.deliveryLocation,
+        message: dto.message,
+        source: dto.source,
+        ip: ctx.ip,
+        userAgent: ctx.userAgent,
+        attachmentUrl: ctx.attachmentUrl,
+      },
+    });
+    this.logger.log(`Lead created #${lead.id} from ${lead.email}`);
+    return lead;
+  }
+
+  async findMany(query: ListLeadsDto) {
+    const where: Prisma.LeadWhereInput = {};
+    if (query.status) where.status = query.status;
+    if (query.from || query.to) {
+      where.createdAt = {};
+      if (query.from) where.createdAt.gte = new Date(query.from);
+      if (query.to) where.createdAt.lte = new Date(query.to);
+    }
+    if (query.q) {
+      const q = query.q.trim();
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { email: { contains: q, mode: 'insensitive' } },
+        { company: { contains: q, mode: 'insensitive' } },
+        { phone: { contains: q, mode: 'insensitive' } },
+        { partNumber: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 25;
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.lead.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.lead.count({ where }),
+    ]);
+
+    return { items, total, page, pageSize, pages: Math.ceil(total / pageSize) };
+  }
+
+  async findOne(id: number) {
+    const lead = await this.prisma.lead.findUnique({
+      where: { id },
+      include: {
+        notes: {
+          orderBy: { createdAt: 'desc' },
+          include: { author: { select: { id: true, name: true, email: true } } },
+        },
+      },
+    });
+    if (!lead) throw new NotFoundException('Lead not found');
+    return lead;
+  }
+
+  async update(id: number, dto: UpdateLeadDto) {
+    await this.findOne(id);
+    return this.prisma.lead.update({ where: { id }, data: dto });
+  }
+
+  async addNote(leadId: number, authorId: string, body: string) {
+    await this.findOne(leadId);
+    return this.prisma.leadNote.create({
+      data: { leadId, authorId, body },
+      include: { author: { select: { id: true, name: true, email: true } } },
+    });
+  }
+
+  async remove(id: number) {
+    await this.findOne(id);
+    await this.prisma.lead.delete({ where: { id } });
+    return { ok: true };
+  }
+
+  async findManyForExport(query: ListLeadsDto) {
+    const where: Prisma.LeadWhereInput = {};
+    if (query.status) where.status = query.status;
+    if (query.from || query.to) {
+      where.createdAt = {};
+      if (query.from) where.createdAt.gte = new Date(query.from);
+      if (query.to) where.createdAt.lte = new Date(query.to);
+    }
+    if (query.q) {
+      const q = query.q.trim();
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { email: { contains: q, mode: 'insensitive' } },
+        { company: { contains: q, mode: 'insensitive' } },
+        { phone: { contains: q, mode: 'insensitive' } },
+        { partNumber: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+    return this.prisma.lead.findMany({ where, orderBy: { createdAt: 'desc' } });
+  }
+}

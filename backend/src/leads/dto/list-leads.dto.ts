@@ -7,6 +7,9 @@ export class ListLeadsDto {
   status?: LeadStatus;
 
   @IsOptional() @IsString()
+  urgency?: string;
+
+  @IsOptional() @IsString()
   q?: string;
 
   @IsOptional() @IsString()

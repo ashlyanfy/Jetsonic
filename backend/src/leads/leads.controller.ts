@@ -59,6 +59,12 @@ export class LeadsController {
     return this.leads.findMany(query);
   }
 
+  @Get('stats')
+  @UseGuards(JwtAuthGuard)
+  stats() {
+    return this.leads.stats();
+  }
+
   @Get('export')
   @UseGuards(JwtAuthGuard)
   async export(@Query() query: ListLeadsDto, @Res() res: Response) {

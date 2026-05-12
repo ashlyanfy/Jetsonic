@@ -51,6 +51,7 @@ export class LeadsService {
   async findMany(query: ListLeadsDto) {
     const where: Prisma.LeadWhereInput = {};
     if (query.status) where.status = query.status;
+    if (query.urgency) where.urgency = query.urgency;
     if (query.from || query.to) {
       where.createdAt = {};
       if (query.from) where.createdAt.gte = new Date(query.from);
@@ -119,6 +120,7 @@ export class LeadsService {
   async findManyForExport(query: ListLeadsDto) {
     const where: Prisma.LeadWhereInput = {};
     if (query.status) where.status = query.status;
+    if (query.urgency) where.urgency = query.urgency;
     if (query.from || query.to) {
       where.createdAt = {};
       if (query.from) where.createdAt.gte = new Date(query.from);
@@ -135,5 +137,34 @@ export class LeadsService {
       ];
     }
     return this.prisma.lead.findMany({ where, orderBy: { createdAt: 'desc' } });
+  }
+
+  async stats() {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [total, newCount, inProgress, planned, rejected, converted, aog, last7] =
+      await this.prisma.$transaction([
+        this.prisma.lead.count(),
+        this.prisma.lead.count({ where: { status: 'NEW' } }),
+        this.prisma.lead.count({ where: { status: 'IN_PROGRESS' } }),
+        this.prisma.lead.count({ where: { status: 'PLANNED' } }),
+        this.prisma.lead.count({ where: { status: 'REJECTED' } }),
+        this.prisma.lead.count({ where: { status: 'CONVERTED' } }),
+        this.prisma.lead.count({ where: { urgency: 'AOG' } }),
+        this.prisma.lead.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+      ]);
+
+    return {
+      total,
+      byStatus: {
+        NEW: newCount,
+        IN_PROGRESS: inProgress,
+        PLANNED: planned,
+        REJECTED: rejected,
+        CONVERTED: converted,
+      },
+      aog,
+      last7,
+    };
   }
 }

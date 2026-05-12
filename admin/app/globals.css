@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand-50: #eef7ff;
+  --color-brand-100: #d8eeff;
+  --color-brand-200: #b7defc;
+  --color-brand-500: #2389d6;
+  --color-brand-600: #075b94;
+  --color-brand-700: #05365c;
+  --color-brand-800: #042846;
+  --color-brand-900: #062c49;
+
+  --color-accent-400: #56d3df;
+  --color-accent-500: #2eb9c8;
+  --color-accent-600: #1f9aa8;
+
+  --color-gold-500: #d79b40;
+
+  --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  --background: #f7fbff;
+  --foreground: #062c49;
+  --surface: #ffffff;
+  --surface-2: #eef7ff;
+  --line: rgba(6, 44, 73, 0.12);
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  color: var(--foreground);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(circle at 82% 8%, rgba(46, 185, 200, 0.10), transparent 30%),
+    radial-gradient(circle at 8% 0%, #ffffff 0%, #f2f9ff 38%, #f7fbff 100%);
+  background-attachment: fixed;
+}
+
+.brand-gradient {
+  background: linear-gradient(135deg, #05365c 0%, #075b94 60%, #2eb9c8 100%);
+}
+
+.brand-text-gradient {
+  background: linear-gradient(135deg, #05365c, #2eb9c8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

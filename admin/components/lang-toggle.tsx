@@ -7,7 +7,7 @@ export function LangToggle() {
   const { lang, setLang } = useLang();
 
   return (
-    <div className="grid h-10 grid-cols-2 rounded-full border border-[rgba(6,44,73,0.12)] bg-white p-1 text-xs font-black">
+    <div className="grid h-10 w-24 grid-cols-2 gap-1 rounded-full border border-[rgba(6,44,73,0.12)] bg-white p-1 text-xs font-black">
       <button
         type="button"
         onClick={() => setLang("en")}

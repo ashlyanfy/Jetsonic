@@ -1,0 +1,16 @@
+{
+  "name": "jetsonic-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Jetsonic Trading FZCO marketing site (static).",
+  "scripts": {
+    "start": "serve -s . --no-clipboard -l tcp://0.0.0.0:${PORT:-5500}",
+    "dev": "serve -s . -l 5500"
+  },
+  "dependencies": {
+    "serve": "^14.2.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

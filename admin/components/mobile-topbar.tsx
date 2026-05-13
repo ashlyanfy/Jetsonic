@@ -15,14 +15,16 @@ export function MobileTopbar({ onMenu }: { onMenu: () => void }) {
       >
         <Menu size={18} />
       </button>
-      <div className="flex items-center gap-2">
-        <div className="flex flex-col items-center">
+      <div className="flex flex-1 items-center justify-center gap-3">
+        <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-white shadow-[0_10px_24px_rgba(5,54,92,0.14)]">
           <img
             src="/assets/jetsonic_trade_logo.png"
             alt="Jetsonic logo"
-            className="h-10 w-auto rounded-2xl object-contain"
+            className="h-11 w-auto object-contain"
           />
-          <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-accent-600">
+        </div>
+        <div className="flex flex-col items-center -mt-1">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent-600">
             {lang === "ru" ? "Админ" : "Admin"}
           </span>
         </div>

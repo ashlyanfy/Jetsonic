@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Download, RefreshCw, Search, ChevronRight } from "lucide-react";
 import { api, downloadFile } from "@/lib/api";
@@ -21,12 +22,22 @@ const URGENCIES = ["AOG", "Priority", "Routine"];
 
 export function LeadsView() {
   const { t, lang } = useLang();
-  const [q, setQ] = useState("");
+  const searchParams = useSearchParams();
+  const [q, setQ] = useState(searchParams.get("q") ?? "");
   const [status, setStatus] = useState<LeadStatus | "">("");
   const [urgency, setUrgency] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const fromUrl = searchParams.get("q");
+    if (fromUrl !== null && fromUrl !== q) {
+      setQ(fromUrl);
+      setPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const query = useQuery({
     queryKey: ["leads", { q, status, urgency, from, to, page }],

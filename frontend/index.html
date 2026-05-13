@@ -15,6 +15,7 @@
   <link rel="icon" href="/assets/icon-192.png">
   <link rel="apple-touch-icon" href="/assets/icon-192.png">
   <link rel="stylesheet" href="/styles.css">
+  <meta name="cms-api" content="https://jetsonic-backend.up.railway.app/api/v1">
 </head>
 <body data-page="home">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -35,16 +36,16 @@
 </header>
   <main id="main">
 
-<section class="hero cinematic">
+<section class="hero cinematic" data-cms-page="home" data-cms-section="0">
   <div class="hero-bg"><img src="/assets/hero-aircraft.jpg" alt="Aircraft flying above clouds"></div>
   <div class="container hero-content">
     <div class="hero-panel reveal">
-      <p class="eyebrow" data-en="AOG and RFQ request platform from Dubai" data-ar="منصة طلبات AOG و RFQ من دبي">AOG and RFQ request platform from Dubai</p>
-      <h1 data-en="Certified aircraft parts sourcing and AOG support for Central Asia and the Middle East." data-ar="توريد قطع طائرات موثقة ودعم AOG لآسيا الوسطى والشرق الأوسط.">Certified aircraft parts sourcing and AOG support for Central Asia and the Middle East.</h1>
-      <p class="hero-lead" data-en="Jetsonic Trading FZCO helps airlines, MRO centers, private operators and aviation brokers send precise part requests, align FAA/EASA documentation and move urgent orders through a disciplined sourcing path." data-ar="تساعد Jetsonic Trading FZCO شركات الطيران ومراكز الصيانة والمشغلين والوسطاء على إرسال طلبات قطع دقيقة ومواءمة وثائق FAA/EASA وتحريك الطلبات العاجلة عبر مسار توريد منضبط.">Jetsonic Trading FZCO helps airlines, MRO centers, private operators and aviation brokers send precise part requests, align FAA/EASA documentation and move urgent orders through a disciplined sourcing path.</p>
+      <p class="eyebrow" data-cms-page="home" data-cms-block="0" data-cms-key="eyebrowEn" data-en="AOG and RFQ request platform from Dubai" data-ar="منصة طلبات AOG و RFQ من دبي">AOG and RFQ request platform from Dubai</p>
+      <h1 data-cms-page="home" data-cms-block="0" data-cms-key="headingEn" data-en="Certified aircraft parts sourcing and AOG support for Central Asia and the Middle East." data-ar="توريد قطع طائرات موثقة ودعم AOG لآسيا الوسطى والشرق الأوسط.">Certified aircraft parts sourcing and AOG support for Central Asia and the Middle East.</h1>
+      <p class="hero-lead" data-cms-page="home" data-cms-block="0" data-cms-key="leadEn" data-en="Jetsonic Trading FZCO helps airlines, MRO centers, private operators and aviation brokers send precise part requests, align FAA/EASA documentation and move urgent orders through a disciplined sourcing path." data-ar="تساعد Jetsonic Trading FZCO شركات الطيران ومراكز الصيانة والمشغلين والوسطاء على إرسال طلبات قطع دقيقة ومواءمة وثائق FAA/EASA وتحريك الطلبات العاجلة عبر مسار توريد منضبط.">Jetsonic Trading FZCO helps airlines, MRO centers, private operators and aviation brokers send precise part requests, align FAA/EASA documentation and move urgent orders through a disciplined sourcing path.</p>
       <div class="hero-actions">
-        <a class="button primary" href="/contact/?request=aog#rfq" data-en="Submit AOG request" data-ar="إرسال طلب AOG">Submit AOG request</a>
-        <a class="button secondary" href="/contact/#rfq" data-en="Request part quote" data-ar="طلب عرض قطعة">Request part quote</a>
+        <a class="button primary" data-cms-page="home" data-cms-block="0" data-cms-key="primaryCtaEn" href="/contact/?request=aog#rfq" data-en="Submit AOG request" data-ar="إرسال طلب AOG">Submit AOG request</a>
+        <a class="button secondary" data-cms-page="home" data-cms-block="0" data-cms-key="secondaryCtaEn" href="/contact/#rfq" data-en="Request part quote" data-ar="طلب عرض قطعة">Request part quote</a>
       </div>
       <div class="trust-strip">
         <div class="stat"><strong>30–60 min</strong><span data-en="Initial sourcing review" data-ar="مراجعة توريد أولية">Initial sourcing review</span></div>
@@ -264,5 +265,6 @@
   <a href="/contact/" data-page-target="contact"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 13h32v24H8z"/><path d="m8 16 16 12 16-12"/></svg><span data-en="RFQ" data-ar="طلب عرض">RFQ</span></a>
 </nav>
   <script src="/app.js" defer></script>
+  <script src="/cms.js" defer></script>
 </body>
 </html>

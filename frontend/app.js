@@ -150,6 +150,12 @@
     });
   }
 
+  // Expose applyLanguage so CMS overlay can re-apply after content updates.
+  window.applyLanguage = function () {
+    const current = document.body.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+    applyLanguage(current);
+  };
+
   // Boot
   const saved = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; } })();
   applyLanguage(saved || DEFAULT_LANG);

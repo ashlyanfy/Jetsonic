@@ -1,5 +1,5 @@
-const CACHE_NAME = 'jetsonic-pwa-v6';
-const ASSETS = ['/', '/parts/', '/services/', '/aog/', '/quality/', '/about/', '/contact/', '/thank-you.html', '/offline.html', '/styles.css', '/app.js', '/manifest.webmanifest', '/assets/jetsonic_trade_logo.png', '/assets/logo.svg', '/assets/hero-aircraft.jpg', '/assets/icon-192.png', '/assets/icon-512.png'];
+const CACHE_NAME = 'jetsonic-pwa-v7';
+const ASSETS = ['/', '/parts/', '/services/', '/aog/', '/quality/', '/about/', '/contact/', '/thank-you.html', '/offline.html', '/styles.css', '/app.js', '/cms.js', '/manifest.webmanifest', '/assets/jetsonic_trade_logo.png', '/assets/logo.svg', '/assets/hero-aircraft.jpg', '/assets/icon-192.png', '/assets/icon-512.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));

@@ -81,6 +81,62 @@ export class PagesService {
     return { ok: true };
   }
 
+  async search(q: string) {
+    const term = q.trim().toLowerCase();
+    if (!term) return { pages: [], blocks: [] };
+
+    const pages = await this.prisma.page.findMany({
+      where: {
+        OR: [
+          { title: { contains: term, mode: 'insensitive' } },
+          { slug: { contains: term, mode: 'insensitive' } },
+        ],
+      },
+      take: 5,
+      include: { _count: { select: { blocks: true } } },
+    });
+
+    const allBlocks = await this.prisma.block.findMany({
+      orderBy: { id: 'asc' },
+      include: { page: { select: { slug: true, title: true } } },
+      take: 200,
+    });
+
+    const blocks = allBlocks
+      .map((b) => {
+        const data = (b.data ?? {}) as Record<string, unknown>;
+        const hit = Object.entries(data).find(
+          ([, v]) => typeof v === 'string' && v.toLowerCase().includes(term),
+        );
+        return hit ? { block: b, key: hit[0], value: hit[1] as string } : null;
+      })
+      .filter((x): x is { block: typeof allBlocks[number]; key: string; value: string } => x !== null)
+      .slice(0, 10)
+      .map(({ block, key, value }) => ({
+        id: block.id,
+        type: block.type,
+        pageSlug: block.page.slug,
+        pageTitle: block.page.title,
+        matchKey: key,
+        matchValue: value.length > 120 ? value.slice(0, 117) + '…' : value,
+        enabled: block.enabled,
+      }));
+
+    return { pages, blocks };
+  }
+
+  async getPublicPage(slug: string) {
+    const page = await this.prisma.page.findUnique({
+      where: { slug },
+      include: {
+        blocks: { where: { enabled: true }, orderBy: { order: 'asc' } },
+        seo: true,
+      },
+    });
+    if (!page) throw new NotFoundException('Page not found');
+    return page;
+  }
+
   async upsertSeo(slug: string, data: { title: string; description: string; keywords?: string; ogImage?: string }) {
     const page = await this.prisma.page.findUnique({ where: { slug } });
     if (!page) throw new NotFoundException('Page not found');

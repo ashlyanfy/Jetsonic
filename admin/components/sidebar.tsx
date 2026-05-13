@@ -65,12 +65,13 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
       >
         <div className="flex h-20 items-center justify-between gap-3 border-b border-[rgba(6,44,73,0.08)] px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl brand-gradient text-white shadow-[0_10px_24px_rgba(5,54,92,0.25)]">
-              <span className="text-lg font-black tracking-tight">J</span>
-            </div>
-            <div className="flex flex-col leading-tight">
-              <span className="text-sm font-black tracking-tight text-brand-700">Jetsonic</span>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent-600">
+            <div className="flex flex-col items-center">
+              <img
+                src="/assets/jetsonic_trade_logo.png"
+                alt="Jetsonic logo"
+                className="h-10 w-auto rounded-2xl object-contain"
+              />
+              <span className="mt-1 text-[11px] font-bold uppercase tracking-[0.18em] text-accent-600">
                 {lang === "ru" ? "Админ" : "Admin"}
               </span>
             </div>

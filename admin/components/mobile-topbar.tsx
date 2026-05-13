@@ -10,20 +10,17 @@ export function MobileTopbar({ onMenu }: { onMenu: () => void }) {
       <button
         type="button"
         onClick={onMenu}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(6,44,73,0.10)] bg-white text-brand-700 hover:bg-brand-50"
+        className="flex h-10 w-13 items-center justify-center rounded-full border border-[rgba(6,44,73,0.10)] bg-white text-brand-700 hover:bg-brand-50"
         aria-label="Open menu"
       >
         <Menu size={18} />
       </button>
-      <div className="flex flex-1 flex-col items-center justify-center gap-1">
+      <div className="flex flex-1 flex-col items-center justify-center left-1/2">
         <img
           src="/assets/jetsonic_trade_logo.png"
           alt="Jetsonic logo"
-          className="h-10 w-auto object-contain"
+          className="h-12 w-auto object-contain"
         />
-        <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-accent-600">
-          {lang === "ru" ? "Админ" : "Admin"}
-        </span>
       </div>
       <div className="w-10" />
     </header>

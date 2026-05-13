@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Search, FileText, ChevronRight } from "lucide-react";
+import { Search, ChevronRight } from "lucide-react";
 import { api } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import type { PageSummary } from "@/lib/cms-types";
 
-export default function SeoPage() {
+export default function SeoListPage() {
   const { lang } = useLang();
   const query = useQuery({
     queryKey: ["pages"],
@@ -20,17 +20,17 @@ export default function SeoPage() {
           eyebrow: "Поисковая оптимизация",
           title: "SEO",
           subtitle: "Заголовки, описания и ключевые слова для каждой страницы.",
-          editLink: "Открыть",
           loading: "Загрузка…",
           error: "Не удалось загрузить страницы.",
+          edit: "Редактировать",
         }
       : {
           eyebrow: "Search engine optimization",
           title: "SEO",
           subtitle: "Titles, descriptions and keywords for every page.",
-          editLink: "Open",
           loading: "Loading…",
           error: "Failed to load pages.",
+          edit: "Edit",
         };
 
   return (
@@ -56,7 +56,7 @@ export default function SeoPage() {
           {query.data.map((page) => (
             <Link
               key={page.id}
-              href={`/pages/${page.slug}`}
+              href={`/seo/${page.slug}`}
               className="group relative overflow-hidden rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/85 p-6 shadow-[0_18px_45px_rgba(6,44,73,0.06)] transition hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(6,44,73,0.12)]"
             >
               <div className="flex items-start justify-between">
@@ -67,9 +67,8 @@ export default function SeoPage() {
               </div>
               <h3 className="mt-4 text-xl font-black tracking-tight text-brand-700">{page.title}</h3>
               <p className="mt-1 text-xs font-mono text-brand-700/50">/{page.slug}</p>
-              <div className="mt-5 flex items-center gap-2 text-xs text-brand-700/60">
-                <FileText size={12} />
-                <span className="font-medium">{labels.editLink}</span>
+              <div className="mt-5 inline-flex h-7 items-center rounded-full bg-brand-50 px-2.5 text-[11px] font-bold uppercase tracking-wider text-brand-700">
+                {labels.edit}
               </div>
             </Link>
           ))}

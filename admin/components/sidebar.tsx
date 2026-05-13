@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Inbox, LayoutGrid, Search, LogOut, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Inbox, LayoutGrid, Search, LogOut, X, Users as UsersIcon } from "lucide-react";
 import { useLang } from "@/lib/i18n";
-import { clearToken } from "@/lib/api";
+import { api, clearToken } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { LangToggle } from "./lang-toggle";
+import type { Role } from "@/lib/types";
 
 interface SidebarProps {
   open?: boolean;
@@ -21,10 +23,17 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
   const cmsLabel = lang === "ru" ? "Контент сайта" : "Site content";
   const seoLabel = "SEO";
 
+  const me = useQuery({
+    queryKey: ["me"],
+    queryFn: () => api<{ id: string; email: string; name: string; role: Role }>("/auth/me"),
+    staleTime: 5 * 60_000,
+  });
+
   const nav = [
     { href: "/leads", label: t("navLeads"), icon: Inbox },
     { href: "/pages", label: cmsLabel, icon: LayoutGrid },
     { href: "/seo", label: seoLabel, icon: Search },
+    ...(me.data?.role === "ADMIN" ? [{ href: "/users", label: t("users"), icon: UsersIcon }] : []),
   ];
 
   function handleLogout() {

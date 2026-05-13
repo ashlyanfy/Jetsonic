@@ -60,6 +60,37 @@ const dict = {
   page: { en: "Page", ru: "Страница" },
   prev: { en: "Previous", ru: "Назад" },
   next: { en: "Next", ru: "Вперёд" },
+
+  users: { en: "Users", ru: "Пользователи" },
+  usersSubtitle: { en: "Team members with access to the admin.", ru: "Сотрудники с доступом к админке." },
+  addUser: { en: "Add user", ru: "Добавить" },
+  editUser: { en: "Edit user", ru: "Редактировать" },
+  deleteUser: { en: "Delete", ru: "Удалить" },
+  deleteConfirm: { en: "Delete this user?", ru: "Удалить этого пользователя?" },
+  name: { en: "Name", ru: "Имя" },
+  role: { en: "Role", ru: "Роль" },
+  newPassword: { en: "New password (leave empty to keep)", ru: "Новый пароль (пусто — не менять)" },
+  cancel: { en: "Cancel", ru: "Отмена" },
+  save: { en: "Save", ru: "Сохранить" },
+  saving: { en: "Saving…", ru: "Сохранение…" },
+  saved: { en: "Saved", ru: "Сохранено" },
+  unsaved: { en: "Unsaved changes", ru: "Есть несохранённые изменения" },
+  roleAdmin: { en: "Admin", ru: "Админ" },
+  roleManager: { en: "Manager", ru: "Менеджер" },
+
+  seoTitle: { en: "Meta title", ru: "Заголовок (Meta title)" },
+  seoDescription: { en: "Meta description", ru: "Описание (Meta description)" },
+  seoKeywords: { en: "Keywords", ru: "Ключевые слова" },
+  seoOgImage: { en: "Social share image (URL)", ru: "Картинка для соцсетей (URL)" },
+  seoKeywordsHint: {
+    en: "Comma separated, e.g. aircraft parts, AOG, RFQ.",
+    ru: "Через запятую, например: запчасти, AOG, RFQ.",
+  },
+  seoTitleHint: { en: "50–60 characters works best for Google.", ru: "Лучше 50–60 символов для Google." },
+  seoDescriptionHint: {
+    en: "Up to 160 characters — what shows under the title in search results.",
+    ru: "До 160 символов — текст под заголовком в результатах поиска.",
+  },
 } as const;
 
 type DictKey = keyof typeof dict;

@@ -20,27 +20,33 @@ interface UpdateUserBody {
 }
 
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
 export class UsersController {
   constructor(private readonly users: UsersService) {}
 
+  // Authenticated users can read the team list (needed for lead assignment).
   @Get()
+  @UseGuards(JwtAuthGuard)
   list() {
     return this.users.list();
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   create(@Body() body: CreateUserBody) {
     return this.users.create(body);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   update(@Param('id') id: string, @Body() body: UpdateUserBody) {
     return this.users.update(id, body);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   remove(@Param('id') id: string, @CurrentUser() current: AuthUser) {
     return this.users.remove(id, current.id);
   }

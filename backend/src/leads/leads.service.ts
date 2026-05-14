@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { Lead, Prisma } from '@prisma/client';
+import { Lead, LeadStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { ListLeadsDto } from './dto/list-leads.dto';
@@ -77,6 +77,7 @@ export class LeadsService {
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
+        include: { assignee: { select: { id: true, name: true, email: true, role: true } } },
       }),
       this.prisma.lead.count({ where }),
     ]);
@@ -92,6 +93,7 @@ export class LeadsService {
           orderBy: { createdAt: 'desc' },
           include: { author: { select: { id: true, name: true, email: true } } },
         },
+        assignee: { select: { id: true, name: true, email: true, role: true } },
       },
     });
     if (!lead) throw new NotFoundException('Lead not found');
@@ -100,7 +102,14 @@ export class LeadsService {
 
   async update(id: number, dto: UpdateLeadDto) {
     await this.findOne(id);
-    return this.prisma.lead.update({ where: { id }, data: dto });
+    const data: { status?: LeadStatus; assigneeId?: string | null } = {};
+    if (dto.status !== undefined) data.status = dto.status;
+    if (dto.assigneeId !== undefined) data.assigneeId = dto.assigneeId === '' ? null : dto.assigneeId;
+    return this.prisma.lead.update({
+      where: { id },
+      data,
+      include: { assignee: { select: { id: true, name: true, email: true, role: true } } },
+    });
   }
 
   async addNote(leadId: number, authorId: string, body: string) {

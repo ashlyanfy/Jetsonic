@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/utils";
 import type { Lead } from "@/lib/types";
 import { StatusBadge, UrgencyBadge } from "@/components/status-badge";
 import { StatusSelect } from "@/components/status-select";
+import { AssigneeSelect } from "@/components/assignee-select";
 import { NotesPanel } from "@/components/notes-panel";
 
 export function LeadDetail({ id }: { id: string }) {
@@ -63,11 +64,15 @@ export function LeadDetail({ id }: { id: string }) {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-2">
-          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-700/60">
-            {sectionLabels.changeStatus}
-          </span>
-          <StatusSelect leadId={lead.id} current={lead.status} />
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-700/60">
+              {sectionLabels.changeStatus}
+            </span>
+            <StatusSelect leadId={lead.id} current={lead.status} />
+          </div>
+
+          <AssigneeSelect leadId={lead.id} current={lead.assigneeId} />
 
           <span className="mx-2 h-7 w-px bg-[rgba(6,44,73,0.10)]" aria-hidden="true" />
 

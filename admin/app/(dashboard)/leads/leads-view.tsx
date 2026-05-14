@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Download, RefreshCw, Search, ChevronRight } from "lucide-react";
-import { api, downloadFile } from "@/lib/api";
+import { Download, RefreshCw, Search, ChevronRight, UserCircle } from "lucide-react";
+import { api } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { formatDate } from "@/lib/utils";
 import type { LeadListResponse, LeadStatus } from "@/lib/types";
@@ -13,8 +13,7 @@ import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Select } from "@/components/select";
 import { StatusBadge, UrgencyBadge } from "@/components/status-badge";
-import { StatsBar } from "@/components/stats-bar";
-import { LeadsChart } from "@/components/leads-chart";
+import { ExportModal } from "@/components/export-modal";
 
 const PAGE_SIZE = 20;
 
@@ -30,6 +29,7 @@ export function LeadsView() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [page, setPage] = useState(1);
+  const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
     const fromUrl = searchParams.get("q");
@@ -57,21 +57,10 @@ export function LeadsView() {
     setPage(1);
   }
 
-  async function handleExport() {
-    const params = new URLSearchParams();
-    if (q) params.set("q", q);
-    if (status) params.set("status", status);
-    if (urgency) params.set("urgency", urgency);
-    if (from) params.set("from", from);
-    if (to) params.set("to", to);
-    const suffix = params.toString() ? `?${params.toString()}` : "";
-    await downloadFile(`/leads/export${suffix}`, `leads-${new Date().toISOString().slice(0, 10)}.xlsx`);
-  }
-
   const totalPages = query.data ? Math.max(1, query.data.pages || Math.ceil(query.data.total / PAGE_SIZE)) : 1;
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] space-y-7 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto w-full max-w-[1280px] space-y-6 p-4 sm:p-6 lg:p-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent-600">
@@ -80,20 +69,17 @@ export function LeadsView() {
           <h1 className="mt-2 text-4xl font-black tracking-tight text-brand-700">{t("leads")}</h1>
           <p className="mt-2 max-w-xl text-sm text-slate-600">{t("leadsSubtitle")}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={() => query.refetch()}>
             <RefreshCw size={16} />
             {t("refresh")}
           </Button>
-          <Button onClick={handleExport}>
+          <Button onClick={() => setExportOpen(true)}>
             <Download size={16} />
             {t("exportExcel")}
           </Button>
         </div>
       </header>
-
-      <StatsBar />
-      <LeadsChart />
 
       <section className="rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/85 p-5 shadow-[0_18px_45px_rgba(6,44,73,0.06)] backdrop-blur-sm">
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-6">
@@ -146,23 +132,8 @@ export function LeadsView() {
             ))}
           </Select>
 
-          <Input
-            type="date"
-            value={from}
-            onChange={(e) => {
-              setFrom(e.target.value);
-              setPage(1);
-            }}
-          />
-
-          <Input
-            type="date"
-            value={to}
-            onChange={(e) => {
-              setTo(e.target.value);
-              setPage(1);
-            }}
-          />
+          <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} />
+          <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} />
         </div>
 
         <div className="mt-3 flex items-center justify-end">
@@ -183,6 +154,7 @@ export function LeadsView() {
                 <th className="px-5 py-3.5 font-bold">{t("colPhone")}</th>
                 <th className="px-5 py-3.5 font-bold">{t("colType")}</th>
                 <th className="px-5 py-3.5 font-bold">{t("colUrgency")}</th>
+                <th className="px-5 py-3.5 font-bold">{lang === "ru" ? "Менеджер" : "Manager"}</th>
                 <th className="px-5 py-3.5 font-bold">{t("colStatus")}</th>
                 <th className="px-5 py-3.5 text-right font-bold">{t("colActions")}</th>
               </tr>
@@ -190,7 +162,7 @@ export function LeadsView() {
             <tbody>
               {query.isLoading && (
                 <tr>
-                  <td colSpan={8} className="px-5 py-10 text-center text-slate-500">
+                  <td colSpan={9} className="px-5 py-10 text-center text-slate-500">
                     {t("loading")}
                   </td>
                 </tr>
@@ -198,7 +170,7 @@ export function LeadsView() {
 
               {query.isError && (
                 <tr>
-                  <td colSpan={8} className="px-5 py-10 text-center text-red-600">
+                  <td colSpan={9} className="px-5 py-10 text-center text-red-600">
                     {t("loadError")}
                   </td>
                 </tr>
@@ -206,13 +178,8 @@ export function LeadsView() {
 
               {query.data?.items.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-5 py-12 text-center">
+                  <td colSpan={9} className="px-5 py-12 text-center">
                     <p className="text-sm font-semibold text-brand-700">{t("noLeads")}</p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      {lang === "ru"
-                        ? "Когда клиент отправит форму на сайте — заявка появится здесь."
-                        : "When a client submits the website form, it will appear here."}
-                    </p>
                   </td>
                 </tr>
               )}
@@ -229,6 +196,16 @@ export function LeadsView() {
                   <td className="px-5 py-4 text-brand-900/80">{lead.requestType ?? "—"}</td>
                   <td className="px-5 py-4">
                     <UrgencyBadge urgency={lead.urgency} />
+                  </td>
+                  <td className="px-5 py-4 text-brand-900/80">
+                    {lead.assignee ? (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-700">
+                        <UserCircle size={14} />
+                        {lead.assignee.name ?? lead.assignee.email}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-400">—</span>
+                    )}
                   </td>
                   <td className="px-5 py-4">
                     <StatusBadge status={lead.status} />
@@ -270,6 +247,12 @@ export function LeadsView() {
           </div>
         )}
       </section>
+
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        baseFilters={{ q, status, urgency }}
+      />
     </div>
   );
 }

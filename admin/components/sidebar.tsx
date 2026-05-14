@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Inbox, LayoutGrid, Search, LogOut, X, Users as UsersIcon } from "lucide-react";
+import { Inbox, LayoutGrid, Search, LogOut, X, Users as UsersIcon, LayoutDashboard, Settings as SettingsIcon } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { api, clearToken } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -31,13 +31,18 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
 
   const isAdmin = me.data?.role === "ADMIN";
 
+  const dashboardLabel = lang === "ru" ? "Главная" : "Dashboard";
+  const settingsLabel = lang === "ru" ? "Настройки" : "Settings";
+
   const nav = [
+    { href: "/main", label: dashboardLabel, icon: LayoutDashboard },
     { href: "/leads", label: t("navLeads"), icon: Inbox },
     ...(isAdmin
       ? [
           { href: "/pages", label: cmsLabel, icon: LayoutGrid },
           { href: "/seo", label: seoLabel, icon: Search },
           { href: "/users", label: t("users"), icon: UsersIcon },
+          { href: "/settings", label: settingsLabel, icon: SettingsIcon },
         ]
       : []),
   ];
@@ -59,13 +64,13 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           type="button"
           aria-label="Close menu"
           onClick={onClose}
-          className="fixed inset-0 z-30 bg-brand-900/40 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-30 bg-brand-900/50 lg:hidden"
         />
       )}
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-[rgba(6,44,73,0.08)] bg-white/95 backdrop-blur-xl transition-transform duration-200 lg:translate-x-0 lg:bg-white/70",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-[rgba(6,44,73,0.08)] bg-white transition-transform duration-200 lg:translate-x-0 lg:bg-white/85 lg:backdrop-blur-xl",
           open ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0",
         )}
       >

@@ -5,8 +5,8 @@ import { GlobalSearch } from "./global-search";
 
 export function MobileTopbar({ onMenu }: { onMenu: () => void }) {
   return (
-    <div className="sticky top-0 z-20 border-b border-[rgba(6,44,73,0.08)] bg-white/85 backdrop-blur-xl lg:hidden">
-      <header className="flex h-16 items-center justify-between px-4">
+    <div className="sticky top-0 z-30 border-b border-[rgba(6,44,73,0.08)] bg-white shadow-[0_4px_12px_rgba(6,44,73,0.06)] lg:hidden">
+      <div className="flex h-16 items-center justify-between px-4">
         <button
           type="button"
           onClick={onMenu}
@@ -15,15 +15,14 @@ export function MobileTopbar({ onMenu }: { onMenu: () => void }) {
         >
           <Menu size={18} />
         </button>
-        <div className="flex flex-1" />
         <img
           src="/assets/jetsonic_trade_logo.png"
           alt="Jetsonic logo"
-          className="h-10 w-auto object-contain"
+          className="h-9 w-auto object-contain"
         />
-      </header>
+      </div>
 
-      <div className="border-t border-[rgba(6,44,73,0.06)] px-4 py-3">
+      <div className="border-t border-[rgba(6,44,73,0.06)] bg-white px-4 py-3">
         <GlobalSearch />
       </div>
     </div>

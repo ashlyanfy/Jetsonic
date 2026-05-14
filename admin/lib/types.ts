@@ -23,6 +23,13 @@ export interface LeadNote {
   createdAt: string;
 }
 
+export interface LeadAssignee {
+  id: string;
+  name: string | null;
+  email: string;
+  role: Role;
+}
+
 export interface Lead {
   id: number;
   createdAt: string;
@@ -48,6 +55,8 @@ export interface Lead {
   message: string | null;
   source: string | null;
   status: LeadStatus;
+  assigneeId: string | null;
+  assignee: LeadAssignee | null;
   notes?: LeadNote[];
 }
 

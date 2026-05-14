@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get(TOKEN_COOKIE)?.value;
 
   if (pathname === "/login") {
-    if (token) return NextResponse.redirect(new URL("/leads", req.url));
+    if (token) return NextResponse.redirect(new URL("/main", req.url));
     return NextResponse.next();
   }
 

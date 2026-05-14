@@ -77,11 +77,13 @@
   }
 
   // API endpoint for RFQ submissions.
-  // Priority: <meta name="jetsonic-api" content="..."> → localhost fallback → PROD_API_BASE.
-  const PROD_API_BASE = 'https://jetsonic-backend-production.up.railway.app/api/v1';
+  // Priority: <meta name="jetsonic-api"> → <meta name="cms-api"> → localhost fallback → PROD_API_BASE.
+  const PROD_API_BASE = 'https://jetsonic-backend.up.railway.app/api/v1';
   const API_BASE = (() => {
-    const meta = document.querySelector('meta[name="jetsonic-api"]');
-    if (meta && meta.content) return meta.content.replace(/\/+$/, '');
+    const explicit = document.querySelector('meta[name="jetsonic-api"]');
+    if (explicit && explicit.content) return explicit.content.replace(/\/+$/, '');
+    const cms = document.querySelector('meta[name="cms-api"]');
+    if (cms && cms.content) return cms.content.replace(/\/+$/, '');
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000/api/v1';
     return PROD_API_BASE;

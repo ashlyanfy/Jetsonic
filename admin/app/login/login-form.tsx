@@ -47,17 +47,15 @@ export function LoginForm() {
         <LangToggle />
       </div>
 
-      <div className="relative rounded-[28px] border border-[rgba(6,44,73,0.08)] bg-white/90 p-8 pt-14 shadow-[0_28px_80px_rgba(6,44,73,0.14)] backdrop-blur-xl">
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2">
-          <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-white shadow-[0_18px_38px_rgba(5,54,92,0.18)] ring-1 ring-[rgba(6,44,73,0.08)]">
-            <img
-              src="/assets/jetsonic_trade_logo.png"
-              alt="Jetsonic Trading FZCO"
-              className="h-16 w-auto object-contain"
-            />
-          </div>
-        </div>
+      <div className="mb-6 flex justify-center">
+        <img
+          src="/assets/jetsonic_trade_logo.png"
+          alt="Jetsonic Trading FZCO"
+          className="h-16 w-auto object-contain"
+        />
+      </div>
 
+      <div className="rounded-[28px] border border-[rgba(6,44,73,0.08)] bg-white/90 p-8 shadow-[0_28px_80px_rgba(6,44,73,0.14)] backdrop-blur-xl">
         <div className="text-center">
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent-600">
             {lang === "ru" ? "Кабинет менеджера" : "Manager workspace"}

@@ -167,4 +167,30 @@ export class LeadsService {
       last7,
     };
   }
+
+  async daily(days: number) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(today);
+    start.setDate(start.getDate() - (days - 1));
+
+    const leads = await this.prisma.lead.findMany({
+      where: { createdAt: { gte: start } },
+      select: { createdAt: true },
+    });
+
+    const buckets: Record<string, number> = {};
+    for (let i = 0; i < days; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      buckets[d.toISOString().slice(0, 10)] = 0;
+    }
+
+    for (const lead of leads) {
+      const key = lead.createdAt.toISOString().slice(0, 10);
+      if (key in buckets) buckets[key] += 1;
+    }
+
+    return Object.entries(buckets).map(([date, count]) => ({ date, count }));
+  }
 }

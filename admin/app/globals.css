@@ -20,7 +20,7 @@
 }
 
 :root {
-  --background: #f7fbff;
+  --background: #eaf3ff;
   --foreground: #062c49;
   --surface: #ffffff;
   --surface-2: #eef7ff;
@@ -29,6 +29,7 @@
 
 html, body {
   height: 100%;
+  width: 100%;
 }
 
 body {
@@ -36,9 +37,64 @@ body {
   font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
   background:
-    radial-gradient(circle at 82% 8%, rgba(46, 185, 200, 0.10), transparent 30%),
-    radial-gradient(circle at 8% 0%, #ffffff 0%, #f2f9ff 38%, #f7fbff 100%);
+    radial-gradient(ellipse at 100% -10%, rgba(46, 185, 200, 0.16), transparent 55%),
+    radial-gradient(ellipse at 0% 100%, rgba(7, 91, 148, 0.09), transparent 55%),
+    linear-gradient(180deg, #dbeefb 0%, #f0f7fd 45%, #f7fbff 100%);
   background-attachment: fixed;
+  margin: 0;
+}
+
+/* Animated cloud layer — visible everywhere, lighter on mobile */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'><g fill='white' opacity='0.55'><ellipse cx='150' cy='180' rx='110' ry='34'/><ellipse cx='220' cy='160' rx='80' ry='28'/><ellipse cx='100' cy='200' rx='70' ry='22'/><ellipse cx='900' cy='120' rx='130' ry='38'/><ellipse cx='980' cy='100' rx='90' ry='28'/><ellipse cx='830' cy='140' rx='70' ry='22'/><ellipse cx='500' cy='560' rx='140' ry='40'/><ellipse cx='580' cy='540' rx='95' ry='30'/><ellipse cx='430' cy='580' rx='75' ry='24'/><ellipse cx='1100' cy='420' rx='100' ry='32'/><ellipse cx='1170' cy='400' rx='70' ry='22'/></g></svg>");
+  background-repeat: repeat-x;
+  background-size: 1400px auto;
+  background-position: 0 0;
+  animation: drift-clouds 140s linear infinite;
+  z-index: 0;
+  opacity: 0.7;
+  will-change: background-position;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><g fill='white' opacity='0.30'><ellipse cx='250' cy='420' rx='180' ry='48'/><ellipse cx='340' cy='400' rx='120' ry='36'/><ellipse cx='160' cy='450' rx='90' ry='28'/><ellipse cx='1100' cy='220' rx='200' ry='52'/><ellipse cx='1240' cy='200' rx='130' ry='38'/><ellipse cx='1000' cy='250' rx='95' ry='28'/><ellipse cx='720' cy='720' rx='180' ry='48'/><ellipse cx='820' cy='700' rx='130' ry='36'/></g></svg>");
+  background-repeat: repeat-x;
+  background-size: 1800px auto;
+  background-position: 0 0;
+  animation: drift-clouds-slow 220s linear infinite;
+  z-index: 0;
+  opacity: 0.45;
+  will-change: background-position;
+}
+
+/* Slow them down further on mobile to reduce GPU load */
+@media (max-width: 1023px) {
+  body::before { animation-duration: 240s; opacity: 0.55; }
+  body::after  { animation-duration: 340s; opacity: 0.35; }
+}
+
+@keyframes drift-clouds {
+  from { background-position: 0 0; }
+  to   { background-position: -1400px 0; }
+}
+
+@keyframes drift-clouds-slow {
+  from { background-position: 0 0; }
+  to   { background-position: 1800px 0; }
+}
+
+/* Main content above any decoration */
+main, aside, header, footer {
+  position: relative;
+  z-index: 1;
 }
 
 .brand-gradient {
@@ -50,4 +106,24 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+@keyframes save-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(46, 185, 200, 0.55), 0 14px 28px rgba(46, 185, 200, 0.30);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(46, 185, 200, 0), 0 18px 36px rgba(46, 185, 200, 0.45);
+    transform: scale(1.03);
+  }
+}
+
+.save-glow {
+  animation: save-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none; }
+  .save-glow { animation: none; }
 }

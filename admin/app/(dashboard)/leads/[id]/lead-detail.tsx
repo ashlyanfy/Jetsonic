@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ExternalLink, Mail, Phone, MessageCircle } from "lucide-react";
 import { api } from "@/lib/api";
@@ -17,6 +18,10 @@ export function LeadDetail({ id }: { id: string }) {
     queryKey: ["lead", id],
     queryFn: () => api<Lead>(`/leads/${id}`),
   });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [id]);
 
   if (query.isLoading)
     return <div className="mx-auto max-w-[1100px] p-8 text-brand-700/60">{t("loading")}</div>;

@@ -8,21 +8,21 @@ export function DesktopTopbar() {
 
   return (
     <header className="sticky top-0 z-20 hidden h-20 items-center gap-6 border-b border-[rgba(6,44,73,0.08)] bg-white/70 px-8 backdrop-blur-xl lg:flex">
-      <div className="flex items-center gap-3">
-        <div className="flex flex-col items-center">
+      <div className="max-w-2xl flex-1">
+        <GlobalSearch />
+      </div>
+
+      <div className="ml-auto flex items-center gap-3">
+        <div className="flex flex-col items-end">
           <img
             src="/assets/jetsonic_trade_logo.png"
             alt="Jetsonic logo"
-            className="h-12 w-auto rounded-2xl object-contain"
+            className="h-12 w-auto object-contain"
           />
           <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-accent-600">
             {lang === "ru" ? "Админ" : "Admin"}
           </span>
         </div>
-      </div>
-
-      <div className="max-w-2xl flex-1">
-        <GlobalSearch />
       </div>
     </header>
   );

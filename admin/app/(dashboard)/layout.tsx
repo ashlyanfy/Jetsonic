@@ -9,12 +9,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen">
       <Sidebar open={open} onClose={() => setOpen(false)} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-screen flex-col lg:pl-64">
         <MobileTopbar onMenu={() => setOpen(true)} />
         <DesktopTopbar />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );

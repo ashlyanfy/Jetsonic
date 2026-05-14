@@ -65,6 +65,13 @@ export class LeadsController {
     return this.leads.stats();
   }
 
+  @Get('daily')
+  @UseGuards(JwtAuthGuard)
+  daily(@Query('days') daysRaw?: string) {
+    const days = Math.min(60, Math.max(7, Number(daysRaw) || 14));
+    return this.leads.daily(days);
+  }
+
   @Get('export')
   @UseGuards(JwtAuthGuard)
   async export(@Query() query: ListLeadsDto, @Res() res: Response) {

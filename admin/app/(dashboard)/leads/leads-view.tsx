@@ -14,6 +14,7 @@ import { Input } from "@/components/input";
 import { Select } from "@/components/select";
 import { StatusBadge, UrgencyBadge } from "@/components/status-badge";
 import { StatsBar } from "@/components/stats-bar";
+import { LeadsChart } from "@/components/leads-chart";
 
 const PAGE_SIZE = 20;
 
@@ -92,6 +93,7 @@ export function LeadsView() {
       </header>
 
       <StatsBar />
+      <LeadsChart />
 
       <section className="rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/85 p-5 shadow-[0_18px_45px_rgba(6,44,73,0.06)] backdrop-blur-sm">
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-6">

@@ -15,14 +15,12 @@ export function MobileTopbar({ onMenu }: { onMenu: () => void }) {
         >
           <Menu size={18} />
         </button>
-        <div className="flex flex-1 items-center justify-center">
-          <img
-            src="/assets/jetsonic_trade_logo.png"
-            alt="Jetsonic logo"
-            className="h-10 w-auto object-contain"
-          />
-        </div>
-        <div className="w-10" />
+        <div className="flex flex-1" />
+        <img
+          src="/assets/jetsonic_trade_logo.png"
+          alt="Jetsonic logo"
+          className="h-10 w-auto object-contain"
+        />
       </header>
 
       <div className="border-t border-[rgba(6,44,73,0.06)] px-4 py-3">

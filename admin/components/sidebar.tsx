@@ -29,11 +29,17 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
     staleTime: 5 * 60_000,
   });
 
+  const isAdmin = me.data?.role === "ADMIN";
+
   const nav = [
     { href: "/leads", label: t("navLeads"), icon: Inbox },
-    { href: "/pages", label: cmsLabel, icon: LayoutGrid },
-    { href: "/seo", label: seoLabel, icon: Search },
-    ...(me.data?.role === "ADMIN" ? [{ href: "/users", label: t("users"), icon: UsersIcon }] : []),
+    ...(isAdmin
+      ? [
+          { href: "/pages", label: cmsLabel, icon: LayoutGrid },
+          { href: "/seo", label: seoLabel, icon: Search },
+          { href: "/users", label: t("users"), icon: UsersIcon },
+        ]
+      : []),
   ];
 
   function handleLogout() {
@@ -59,8 +65,8 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-[rgba(6,44,73,0.08)] bg-white/95 backdrop-blur-xl transition-transform duration-200 lg:static lg:translate-x-0 lg:bg-white/70",
-          open ? "translate-x-0 shadow-2xl" : "-translate-x-full",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-[rgba(6,44,73,0.08)] bg-white/95 backdrop-blur-xl transition-transform duration-200 lg:translate-x-0 lg:bg-white/70",
+          open ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0",
         )}
       >
         <div className="flex h-20 items-center justify-between gap-3 border-b border-[rgba(6,44,73,0.08)] px-6">

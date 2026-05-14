@@ -47,8 +47,8 @@ export function MainView() {
         <p className="mt-2 max-w-xl text-sm text-slate-600">{labels.subtitle}</p>
       </header>
 
-      <StatsBar />
       <LeadsChart />
+      <StatsBar />
 
       <section className="overflow-hidden rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/85 shadow-[0_18px_45px_rgba(6,44,73,0.06)]">
         <div className="flex items-center justify-between border-b border-[rgba(6,44,73,0.06)] bg-brand-50/40 px-5 py-3">

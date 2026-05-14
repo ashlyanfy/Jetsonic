@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Inbox, Loader2, AlertOctagon, CalendarClock } from "lucide-react";
 import { api } from "@/lib/api";
@@ -11,6 +12,13 @@ interface StatsResponse {
   byStatus: Record<string, number>;
   aog: number;
   last7: number;
+}
+
+function lastNDaysRange(days: number) {
+  const today = new Date();
+  const start = new Date(today);
+  start.setDate(start.getDate() - (days - 1));
+  return { from: start.toISOString().slice(0, 10), to: today.toISOString().slice(0, 10) };
 }
 
 export function StatsBar() {
@@ -26,6 +34,8 @@ export function StatsBar() {
       ? { new: "Новых", inProgress: "В работе", aog: "AOG", last7: "За 7 дней" }
       : { new: "New", inProgress: "In progress", aog: "AOG", last7: "Last 7 days" };
 
+  const last7 = lastNDaysRange(7);
+
   const cards = [
     {
       label: labels.new,
@@ -33,6 +43,7 @@ export function StatsBar() {
       Icon: Inbox,
       accent: "from-brand-700 to-brand-600",
       iconBg: "bg-brand-50 text-brand-700",
+      href: "/leads?status=NEW",
     },
     {
       label: labels.inProgress,
@@ -40,6 +51,7 @@ export function StatsBar() {
       Icon: Loader2,
       accent: "from-amber-500 to-amber-400",
       iconBg: "bg-amber-50 text-amber-600",
+      href: "/leads?status=IN_PROGRESS",
     },
     {
       label: labels.aog,
@@ -47,6 +59,7 @@ export function StatsBar() {
       Icon: AlertOctagon,
       accent: "from-red-500 to-red-400",
       iconBg: "bg-red-50 text-red-600",
+      href: "/leads?urgency=AOG",
     },
     {
       label: labels.last7,
@@ -54,15 +67,17 @@ export function StatsBar() {
       Icon: CalendarClock,
       accent: "from-accent-500 to-accent-400",
       iconBg: "bg-accent-500/10 text-accent-600",
+      href: `/leads?from=${last7.from}&to=${last7.to}`,
     },
   ];
 
   return (
     <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((c) => (
-        <div
+        <Link
           key={c.label}
-          className="relative overflow-hidden rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/85 p-5 shadow-[0_18px_45px_rgba(6,44,73,0.06)] transition hover:shadow-[0_22px_55px_rgba(6,44,73,0.10)]"
+          href={c.href}
+          className="group relative overflow-hidden rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/90 p-5 shadow-[0_18px_45px_rgba(6,44,73,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_55px_rgba(6,44,73,0.12)]"
         >
           <div className={cn("absolute inset-x-0 top-0 h-1 bg-gradient-to-r", c.accent)} />
           <div className="flex items-start justify-between gap-3">
@@ -76,7 +91,7 @@ export function StatsBar() {
               <c.Icon size={22} />
             </div>
           </div>
-        </div>
+        </Link>
       ))}
     </section>
   );

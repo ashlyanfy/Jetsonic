@@ -52,7 +52,13 @@ body::after {
   right: 0;
   bottom: 0;
   pointer-events: none;
-  z-index: -1;
+  z-index: 0;
+}
+
+/* Content must sit above the cloud layer */
+main, aside, header, footer, .above-clouds {
+  position: relative;
+  z-index: 1;
 }
 
 body::before {

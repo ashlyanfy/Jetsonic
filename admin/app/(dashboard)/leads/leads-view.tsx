@@ -24,19 +24,25 @@ export function LeadsView() {
   const { t, lang } = useLang();
   const searchParams = useSearchParams();
   const [q, setQ] = useState(searchParams.get("q") ?? "");
-  const [status, setStatus] = useState<LeadStatus | "">("");
-  const [urgency, setUrgency] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [status, setStatus] = useState<LeadStatus | "">((searchParams.get("status") as LeadStatus | null) ?? "");
+  const [urgency, setUrgency] = useState(searchParams.get("urgency") ?? "");
+  const [from, setFrom] = useState(searchParams.get("from") ?? "");
+  const [to, setTo] = useState(searchParams.get("to") ?? "");
   const [page, setPage] = useState(1);
   const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
-    const fromUrl = searchParams.get("q");
-    if (fromUrl !== null && fromUrl !== q) {
-      setQ(fromUrl);
-      setPage(1);
-    }
+    const qUrl = searchParams.get("q") ?? "";
+    const statusUrl = (searchParams.get("status") as LeadStatus | null) ?? "";
+    const urgencyUrl = searchParams.get("urgency") ?? "";
+    const fromUrl = searchParams.get("from") ?? "";
+    const toUrl = searchParams.get("to") ?? "";
+    setQ(qUrl);
+    setStatus(statusUrl);
+    setUrgency(urgencyUrl);
+    setFrom(fromUrl);
+    setTo(toUrl);
+    setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 

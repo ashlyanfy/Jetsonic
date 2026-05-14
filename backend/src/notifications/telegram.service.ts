@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import type { Lead } from '@prisma/client';
 
 /**
@@ -9,8 +9,19 @@ import type { Lead } from '@prisma/client';
  *   ADMIN_BASE_URL      — optional, used to build the lead detail link
  */
 @Injectable()
-export class TelegramService {
+export class TelegramService implements OnModuleInit {
   private readonly logger = new Logger(TelegramService.name);
+
+  onModuleInit() {
+    if (this.isConfigured()) {
+      this.logger.log(`Telegram notifications configured (chat ${this.chatId})`);
+    } else {
+      const missing: string[] = [];
+      if (!this.token) missing.push('TELEGRAM_BOT_TOKEN');
+      if (!this.chatId) missing.push('TELEGRAM_CHAT_ID');
+      this.logger.warn(`Telegram disabled — missing env: ${missing.join(', ')}`);
+    }
+  }
 
   private get token() {
     return process.env.TELEGRAM_BOT_TOKEN ?? '';

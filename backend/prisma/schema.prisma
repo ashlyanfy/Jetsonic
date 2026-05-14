@@ -25,9 +25,23 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  notes         LeadNote[]
-  audits        AuditLog[]
-  assignedLeads Lead[]     @relation("AssignedLeads")
+  notes             LeadNote[]
+  audits            AuditLog[]
+  assignedLeads     Lead[]             @relation("AssignedLeads")
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userId    String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
 }
 
 // ---------- CRM (Leads) ----------

@@ -1,6 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Lead, LeadStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { PushService } from '../notifications/push.service';
+import { TelegramService } from '../notifications/telegram.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { ListLeadsDto } from './dto/list-leads.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
@@ -15,7 +17,11 @@ interface CreateLeadContext {
 export class LeadsService {
   private readonly logger = new Logger(LeadsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly push: PushService,
+    private readonly telegram: TelegramService,
+  ) {}
 
   async create(dto: CreateLeadDto, ctx: CreateLeadContext): Promise<Lead> {
     const lead = await this.prisma.lead.create({
@@ -45,6 +51,11 @@ export class LeadsService {
       },
     });
     this.logger.log(`Lead created #${lead.id} from ${lead.email}`);
+
+    // Fire-and-forget notifications — do not block the response.
+    this.telegram.sendNewLead(lead).catch((e) => this.logger.warn(`Telegram: ${e.message}`));
+    this.push.notifyNewLead(lead).catch((e) => this.logger.warn(`Push: ${e.message}`));
+
     return lead;
   }
 

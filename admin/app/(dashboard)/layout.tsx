@@ -9,14 +9,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative min-h-screen">
+    <>
       <Sidebar open={open} onClose={() => setOpen(false)} />
 
-      <div className="min-h-screen lg:ml-64">
+      <div className="lg:pl-64">
         <MobileTopbar onMenu={() => setOpen(true)} />
         <DesktopTopbar />
         <main>{children}</main>
       </div>
-    </div>
+    </>
   );
 }

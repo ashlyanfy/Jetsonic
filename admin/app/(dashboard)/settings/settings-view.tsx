@@ -66,64 +66,78 @@ export function SettingsView() {
       ? {
           eyebrow: "Настройки",
           title: "Уведомления",
-          subtitle: "Куда отправлять оповещения о новых заявках.",
+          subtitle: "Куда отправлять оповещения о новых заявках клиентов.",
           forbidden: "Только администратор может менять настройки.",
-          channel: "Канал доставки",
-          channelOff: "Выключено",
-          channelEmail: "Email",
-          channelTelegram: "Telegram",
-          channelBoth: "Email + Telegram",
-          emailLabel: "Адрес для уведомлений",
-          tgLabel: "Telegram chat ID",
-          tgHint: "Чат куда отправлять сообщения. См. ниже как узнать chat ID.",
-          tgHelp: "Чтобы узнать chat ID: открой Telegram → найди @jetsonic_trade_bot → нажми Start → отправь любое сообщение → этот ID показан на странице админ-бэкенда в логах.",
+          channel: "Куда присылать уведомления",
+          channelOff: "Не присылать",
+          channelEmail: "На почту",
+          channelTelegram: "В Telegram",
+          channelBoth: "Почта + Telegram",
+          emailLabel: "Адрес почты для уведомлений",
+          tgLabel: "ID чата в Telegram",
+          tgHint: "Это номер вашего чата с ботом. Как его узнать — пошагово ниже.",
+          tgHelp:
+            "Шаг 1. Откройте Telegram на телефоне или в компьютере.\nШаг 2. В поиске наберите @jetsonic_trade_bot и откройте бот.\nШаг 3. Нажмите кнопку «Запустить» (Start) внизу.\nШаг 4. Отправьте боту любое сообщение, например «привет».\nШаг 5. Скопируйте сюда числовой ID (его подскажет администратор системы — он виден в логах сервера, либо запросите его у разработчика).",
           save: "Сохранить настройки",
           saved: "Сохранено",
           note:
-            "Логин для бота и chat ID должны быть прописаны в env-переменных Railway: TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID. После этого заявки начнут приходить в Telegram автоматически.",
-          pushTitle: "Push-уведомления в браузер",
-          pushSubtitle: "Получай оповещения о новых заявках прямо в этом устройстве, даже когда админка закрыта.",
-          pushEnable: "Включить push",
+            "Чтобы заявки начали приходить в Telegram автоматически, администратор системы должен прописать секретный токен бота и ID чата в настройках сервера. После этого ничего нажимать не нужно — оповещения будут приходить сами при каждой новой заявке.",
+          pushTitle: "Уведомления в браузере (push)",
+          pushSubtitle:
+            "Получайте короткое всплывающее уведомление о новой заявке прямо на этом устройстве — даже когда админка закрыта в фоне.",
+          pushEnable: "Включить уведомления",
           pushDisable: "Выключить",
-          pushTest: "Отправить тестовое",
-          pushStatusUnsupported: "Браузер не поддерживает push.",
-          pushStatusDisabledServer: "Сервер не настроен (нет VAPID ключей).",
-          pushStatusPermissionDenied: "Разрешение отозвано в настройках браузера.",
-          pushStatusNotSubscribed: "Вы не подписаны.",
-          pushStatusSubscribed: "Включено на этом устройстве.",
-          testSent: "Тест отправлен.",
-          working: "Работаем…",
+          pushTest: "Проверить — отправить тестовое",
+          pushStatusUnsupported: "Этот браузер не поддерживает push-уведомления. Попробуйте Chrome, Edge или Safari.",
+          pushStatusDisabledServer: "Push-уведомления пока не настроены на сервере. Обратитесь к администратору.",
+          pushStatusPermissionDenied:
+            "Вы заблокировали уведомления в настройках браузера. Откройте настройки сайта → разрешите уведомления → обновите страницу.",
+          pushStatusNotSubscribed: "Уведомления не подключены.",
+          pushStatusSubscribed: "Уведомления включены на этом устройстве.",
+          testSent: "Тест отправлен — проверьте уведомление.",
+          working: "Подождите…",
+          pushHowto:
+            "Что произойдёт: после нажатия «Включить» браузер один раз спросит разрешение — нажмите «Разрешить». Дальше при каждой новой заявке вы будете слышать короткий сигнал и видеть всплывающее окно. Клик по уведомлению откроет карточку заявки в админке.",
+          emailHowto:
+            "На указанную почту будут приходить письма с темой «Новая заявка #N» и всей информацией от клиента. Можно указать общий ящик команды (например manager@jetsonictrade.ae) или личный.",
         }
       : {
           eyebrow: "Settings",
           title: "Notifications",
-          subtitle: "Where to send alerts about new leads.",
+          subtitle: "Where to send alerts about new customer leads.",
           forbidden: "Only admins can change settings.",
-          channel: "Delivery channel",
+          channel: "Where to send alerts",
           channelOff: "Off",
           channelEmail: "Email",
           channelTelegram: "Telegram",
           channelBoth: "Email + Telegram",
-          emailLabel: "Notification email",
+          emailLabel: "Email address for alerts",
           tgLabel: "Telegram chat ID",
-          tgHint: "Chat where messages will be sent. See how to find the chat ID below.",
-          tgHelp: "To get the chat ID: open Telegram → find @jetsonic_trade_bot → press Start → send any message → the chat ID will be shown in the admin backend logs.",
+          tgHint: "The chat where the bot will send messages. Step-by-step below.",
+          tgHelp:
+            "Step 1. Open Telegram on your phone or desktop.\nStep 2. Search @jetsonic_trade_bot and open the bot.\nStep 3. Press the Start button.\nStep 4. Send the bot any message (e.g. 'hi').\nStep 5. Paste the numeric chat ID here. The administrator can read it from the server logs.",
           save: "Save settings",
           saved: "Saved",
           note:
-            "Bot token and chat ID must be set in Railway env: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID. After that, leads will be delivered to Telegram automatically.",
+            "For Telegram delivery to actually work, the system administrator must add the bot token and chat ID to the server env. After that, every new lead is forwarded automatically.",
           pushTitle: "Browser push notifications",
-          pushSubtitle: "Receive alerts on this device, even when the admin panel is closed.",
-          pushEnable: "Enable push",
+          pushSubtitle:
+            "Get a small popup on this device whenever a new lead comes in — even when the admin panel is closed.",
+          pushEnable: "Enable notifications",
           pushDisable: "Disable",
-          pushTest: "Send test",
-          pushStatusUnsupported: "Browser does not support push.",
-          pushStatusDisabledServer: "Server not configured (VAPID keys missing).",
-          pushStatusPermissionDenied: "Permission denied in browser settings.",
-          pushStatusNotSubscribed: "You are not subscribed.",
+          pushTest: "Test — send a sample",
+          pushStatusUnsupported: "This browser does not support push. Try Chrome, Edge or Safari.",
+          pushStatusDisabledServer: "Push not configured on the server. Ask the administrator.",
+          pushStatusPermissionDenied:
+            "Notifications are blocked in browser settings. Open site settings → allow notifications → refresh.",
+          pushStatusNotSubscribed: "Not subscribed.",
           pushStatusSubscribed: "Enabled on this device.",
-          testSent: "Test sent.",
+          testSent: "Test sent — check your notifications.",
           working: "Working…",
+          pushHowto:
+            "What happens: after you click Enable, the browser asks once for permission — click Allow. From then on, every new lead triggers a small popup with a sound. Click the popup to open the lead in the admin.",
+          emailHowto:
+            "The email will receive a message titled 'New lead #N' with all the client details. You can use a team inbox (e.g. manager@jetsonictrade.ae) or a personal one.",
         };
 
   if (me.data && me.data.role !== "ADMIN") {
@@ -257,6 +271,10 @@ export function SettingsView() {
             {pushMessage}
           </p>
         )}
+
+        <p className="mt-3 rounded-2xl border border-accent-500/20 bg-accent-500/5 px-3.5 py-3 text-xs leading-relaxed text-brand-700/80">
+          {labels.pushHowto}
+        </p>
       </section>
 
       <form
@@ -305,6 +323,9 @@ export function SettingsView() {
               onChange={(e) => setState({ ...state, emailTo: e.target.value })}
               placeholder="manager@jetsonictrade.ae"
             />
+            <p className="rounded-2xl border border-accent-500/20 bg-accent-500/5 px-3.5 py-3 text-xs leading-relaxed text-brand-700/80">
+              {labels.emailHowto}
+            </p>
           </div>
         )}
 
@@ -317,7 +338,7 @@ export function SettingsView() {
               placeholder="123456789"
             />
             <p className="text-xs text-brand-700/55">{labels.tgHint}</p>
-            <p className="rounded-2xl border border-accent-500/20 bg-accent-500/5 px-3.5 py-3 text-xs text-brand-700/80">
+            <p className="whitespace-pre-line rounded-2xl border border-accent-500/20 bg-accent-500/5 px-3.5 py-3 text-xs leading-relaxed text-brand-700/80">
               {labels.tgHelp}
             </p>
           </div>

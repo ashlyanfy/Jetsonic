@@ -8,6 +8,7 @@ import { useLang } from "@/lib/i18n";
 import { api, clearToken } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { LangToggle } from "./lang-toggle";
+import { InstallSidebarItem } from "./install-button";
 import type { Role } from "@/lib/types";
 
 interface SidebarProps {
@@ -121,6 +122,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         </nav>
 
         <div className="space-y-3 border-t border-[rgba(6,44,73,0.08)] p-3">
+          <InstallSidebarItem />
           <LangToggle />
           <button
             type="button"

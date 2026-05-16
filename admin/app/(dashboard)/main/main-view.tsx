@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Mail, Phone, UserCircle } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import { api } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { formatDate } from "@/lib/utils";
@@ -15,8 +15,8 @@ export function MainView() {
   const { lang, t } = useLang();
 
   const recent = useQuery({
-    queryKey: ["leads", { page: 1, pageSize: 8 }],
-    queryFn: () => api<LeadListResponse>("/leads", { query: { page: 1, pageSize: 8 } }),
+    queryKey: ["leads", { page: 1, pageSize: 10 }],
+    queryFn: () => api<LeadListResponse>("/leads", { query: { page: 1, pageSize: 10 } }),
     refetchInterval: 60_000,
   });
 
@@ -29,10 +29,6 @@ export function MainView() {
           recent: "Последние заявки",
           viewAll: "Все заявки",
           empty: "Заявок пока нет.",
-          partNumber: "Деталь",
-          aircraft: "Тип ВС",
-          manager: "Менеджер",
-          unassigned: "Не назначен",
         }
       : {
           eyebrow: "Manager workspace",
@@ -41,10 +37,6 @@ export function MainView() {
           recent: "Recent leads",
           viewAll: "All leads",
           empty: "No leads yet.",
-          partNumber: "Part",
-          aircraft: "Aircraft",
-          manager: "Manager",
-          unassigned: "Unassigned",
         };
 
   return (
@@ -78,66 +70,51 @@ export function MainView() {
         )}
 
         {recent.data && recent.data.items.length > 0 && (
-          <ul className="divide-y divide-[rgba(6,44,73,0.05)]">
-            {recent.data.items.map((lead) => (
-              <li key={lead.id}>
-                <Link
-                  href={`/leads/${lead.id}`}
-                  className="flex flex-col gap-3 px-5 py-4 transition hover:bg-brand-50/40 sm:flex-row sm:items-start sm:gap-4"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-black text-brand-700">
-                    {(lead.name?.[0] ?? "?").toUpperCase()}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span className="text-sm font-bold text-brand-700">{lead.name}</span>
-                      <span className="text-xs text-brand-700/70">{lead.company ?? "—"}</span>
-                      <span className="text-xs text-brand-700/40">·</span>
-                      <span className="text-xs text-brand-700/50">{formatDate(lead.createdAt)}</span>
-                    </div>
-
-                    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-brand-700/70">
-                      {lead.phone && (
-                        <span className="inline-flex items-center gap-1">
-                          <Phone size={12} />
-                          {lead.phone}
-                        </span>
-                      )}
-                      {lead.email && (
-                        <span className="inline-flex items-center gap-1">
-                          <Mail size={12} />
-                          {lead.email}
-                        </span>
-                      )}
-                      {lead.partNumber && (
-                        <span className="inline-flex items-center gap-1 font-mono">
-                          <span className="font-bold text-brand-700/50">{labels.partNumber}:</span>
-                          {lead.partNumber}
-                        </span>
-                      )}
-                      {lead.aircraftType && (
-                        <span className="inline-flex items-center gap-1">
-                          <span className="font-bold text-brand-700/50">{labels.aircraft}:</span>
-                          {lead.aircraftType}
-                        </span>
-                      )}
-                      <span className="inline-flex items-center gap-1">
-                        <UserCircle size={12} />
-                        <span className="font-bold text-brand-700/50">{labels.manager}:</span>
-                        {lead.assignee ? lead.assignee.name ?? lead.assignee.email : labels.unassigned}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex shrink-0 flex-wrap items-center gap-2">
-                    <UrgencyBadge urgency={lead.urgency} />
-                    <StatusBadge status={lead.status} />
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-[rgba(6,44,73,0.05)] bg-brand-50/30 text-left text-[11px] uppercase tracking-[0.14em] text-brand-700/70">
+                <tr>
+                  <th className="px-5 py-3 font-bold">{t("colDate")}</th>
+                  <th className="px-5 py-3 font-bold">{t("colName")}</th>
+                  <th className="px-5 py-3 font-bold">{t("colCompany")}</th>
+                  <th className="px-5 py-3 font-bold">{t("colPhone")}</th>
+                  <th className="px-5 py-3 font-bold">{t("colType")}</th>
+                  <th className="px-5 py-3 font-bold">{t("colUrgency")}</th>
+                  <th className="px-5 py-3 font-bold">{t("colStatus")}</th>
+                  <th className="px-5 py-3 text-right font-bold">{t("colActions")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recent.data.items.map((lead) => (
+                  <tr
+                    key={lead.id}
+                    className="border-b border-[rgba(6,44,73,0.05)] last:border-0 transition hover:bg-brand-50/40"
+                  >
+                    <td className="px-5 py-3.5 text-brand-700/70">{formatDate(lead.createdAt)}</td>
+                    <td className="px-5 py-3.5 font-bold text-brand-700">{lead.name}</td>
+                    <td className="px-5 py-3.5 text-brand-900/80">{lead.company ?? "—"}</td>
+                    <td className="px-5 py-3.5 text-brand-900/80">{lead.phone ?? "—"}</td>
+                    <td className="px-5 py-3.5 text-brand-900/80">{lead.requestType ?? "—"}</td>
+                    <td className="px-5 py-3.5">
+                      <UrgencyBadge urgency={lead.urgency} />
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <StatusBadge status={lead.status} />
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <Link
+                        href={`/leads/${lead.id}`}
+                        className="inline-flex h-8 items-center gap-1 rounded-full border border-[rgba(6,44,73,0.12)] bg-white px-3 text-xs font-bold text-brand-700 transition hover:border-brand-700/30 hover:bg-brand-50"
+                      >
+                        {t("open")}
+                        <ChevronRight size={12} />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

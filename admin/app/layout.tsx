@@ -12,6 +12,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Jetsonic Admin",
   description: "Jetsonic Trading FZCO — admin dashboard",
+  manifest: "/manifest.webmanifest",
+  themeColor: "#05365c",
+  appleWebApp: {
+    capable: true,
+    title: "Jetsonic Admin",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

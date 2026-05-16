@@ -113,19 +113,38 @@ export class LeadsService {
 
   async update(id: number, dto: UpdateLeadDto, actingUserId?: string) {
     const existing = await this.findOne(id);
-    const data: { status?: LeadStatus; assigneeId?: string | null } = {};
-    if (dto.status !== undefined) data.status = dto.status;
-    if (dto.assigneeId !== undefined) data.assigneeId = dto.assigneeId === '' ? null : dto.assigneeId;
 
-    // Auto-assign the acting user when status changes and lead has no assignee yet
-    // and the request did not explicitly pass an assigneeId.
+    // Allowlisted scalar fields we accept from the editor.
+    const SCALAR_FIELDS: Array<keyof UpdateLeadDto> = [
+      'name', 'email', 'phone', 'company', 'role',
+      'requestType', 'urgency',
+      'partNumber', 'altPartNumber', 'aircraftType', 'tailNumber', 'ataChapter',
+      'quantity', 'condition', 'certificate', 'deliveryLocation', 'message',
+    ];
+
+    const data: Prisma.LeadUpdateInput = {};
+    if (dto.status !== undefined) data.status = dto.status;
+    if (dto.assigneeId !== undefined) {
+      data.assignee = dto.assigneeId === '' || dto.assigneeId === null
+        ? { disconnect: true }
+        : { connect: { id: dto.assigneeId } };
+    }
+    if (dto.targetDate !== undefined) {
+      data.targetDate = dto.targetDate ? new Date(dto.targetDate) : null;
+    }
+    for (const key of SCALAR_FIELDS) {
+      const value = dto[key];
+      if (value !== undefined) (data as Record<string, unknown>)[key] = value;
+    }
+
+    // Auto-assign acting user when status changes and the lead has no assignee yet.
     if (
       dto.status !== undefined &&
       dto.assigneeId === undefined &&
       !existing.assigneeId &&
       actingUserId
     ) {
-      data.assigneeId = actingUserId;
+      data.assignee = { connect: { id: actingUserId } };
     }
 
     return this.prisma.lead.update({

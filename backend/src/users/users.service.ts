@@ -27,6 +27,15 @@ export class UsersService {
     });
   }
 
+  async setLanguage(userId: string, language: string) {
+    const lang = language === 'ru' ? 'ru' : 'en';
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { language: lang },
+      select: { id: true, language: true },
+    });
+  }
+
   async create(data: CreateUserInput) {
     const existing = await this.prisma.user.findUnique({ where: { email: data.email } });
     if (existing) throw new BadRequestException('User with this email already exists');

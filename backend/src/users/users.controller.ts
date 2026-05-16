@@ -19,6 +19,13 @@ export class UsersController {
     return this.users.list();
   }
 
+  // Any logged-in user can save their own language preference.
+  @Patch('me/language')
+  @UseGuards(JwtAuthGuard)
+  setLanguage(@Body() body: { language: string }, @CurrentUser() current: AuthUser) {
+    return this.users.setLanguage(current.id, body.language);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)

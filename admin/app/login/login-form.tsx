@@ -7,6 +7,7 @@ import { useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/lang-toggle";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
+import { InstallHint } from "@/components/install-button";
 
 interface LoginResponse {
   accessToken: string;
@@ -110,6 +111,8 @@ export function LoginForm() {
           </Button>
         </form>
       </div>
+
+      <InstallHint />
     </div>
   );
 }

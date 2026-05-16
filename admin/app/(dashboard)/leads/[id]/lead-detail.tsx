@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ExternalLink, Mail, Phone, MessageCircle, Download } from "lucide-react";
+import { ArrowLeft, ExternalLink, Mail, Phone, MessageCircle, Download, Pencil } from "lucide-react";
 import { api, downloadFile } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { formatDate } from "@/lib/utils";
@@ -12,9 +12,11 @@ import { StatusBadge, UrgencyBadge } from "@/components/status-badge";
 import { StatusSelect } from "@/components/status-select";
 import { AssigneeSelect } from "@/components/assignee-select";
 import { NotesPanel } from "@/components/notes-panel";
+import { LeadEditForm } from "@/components/lead-edit-form";
 
 export function LeadDetail({ id }: { id: string }) {
   const { t, lang } = useLang();
+  const [editing, setEditing] = useState(false);
   const query = useQuery({
     queryKey: ["lead", id],
     queryFn: () => api<Lead>(`/leads/${id}`),
@@ -113,8 +115,19 @@ export function LeadDetail({ id }: { id: string }) {
             <Download size={14} />
             Excel
           </button>
+
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-brand-700 px-4 text-sm font-bold text-white shadow-[0_12px_26px_rgba(5,54,92,0.22)] transition hover:bg-brand-600"
+          >
+            <Pencil size={14} />
+            {lang === "ru" ? "Редактировать" : "Edit"}
+          </button>
         </div>
       </header>
+
+      {editing && <LeadEditForm lead={lead} onClose={() => setEditing(false)} />}
 
       <section className="grid gap-6 lg:grid-cols-2">
         <Card title={sectionLabels.contact}>

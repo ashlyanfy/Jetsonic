@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { api, getToken } from "./api";
 
 export type Lang = "en" | "ru";
 
@@ -108,14 +109,40 @@ const STORAGE_KEY = "jetsonic_admin_lang";
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
 
+  // On mount: local cache first (instant), then sync from backend if logged in.
   useEffect(() => {
     const saved = (typeof window !== "undefined" && (localStorage.getItem(STORAGE_KEY) as Lang | null)) || null;
     if (saved === "en" || saved === "ru") setLangState(saved);
+
+    if (getToken()) {
+      api<{ language?: string }>("/auth/me")
+        .then((me) => {
+          if (me?.language === "ru" || me?.language === "en") {
+            setLangState(me.language);
+            try {
+              localStorage.setItem(STORAGE_KEY, me.language);
+            } catch {
+              /* ignore */
+            }
+          }
+        })
+        .catch(() => {
+          /* ignore — keep local lang */
+        });
+    }
   }, []);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
     if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, l);
+    if (getToken()) {
+      api("/users/me/language", {
+        method: "PATCH",
+        body: JSON.stringify({ language: l }),
+      }).catch(() => {
+        /* silent: local cache still updated */
+      });
+    }
   }, []);
 
   const t = useCallback((key: DictKey) => dict[key][lang], [lang]);

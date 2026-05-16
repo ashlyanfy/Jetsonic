@@ -67,9 +67,9 @@ export class LeadsController {
 
   @Get('daily')
   @UseGuards(JwtAuthGuard)
-  daily(@Query('days') daysRaw?: string) {
+  daily(@Query('days') daysRaw?: string, @Query('status') status?: string) {
     const days = Math.min(60, Math.max(7, Number(daysRaw) || 14));
-    return this.leads.daily(days);
+    return this.leads.daily(days, status);
   }
 
   @Get('export')
@@ -89,10 +89,30 @@ export class LeadsController {
     return this.leads.findOne(id);
   }
 
+  @Get(':id/export')
+  @UseGuards(JwtAuthGuard)
+  async exportOne(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    const lead = await this.leads.findOne(id);
+    const xlsx = await buildLeadsXlsx([lead]);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="jetsonic-lead-${id}.xlsx"`,
+    );
+    res.send(xlsx);
+  }
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateLeadDto) {
-    return this.leads.update(id, dto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateLeadDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.leads.update(id, dto, user.id);
   }
 
   @Post(':id/notes')

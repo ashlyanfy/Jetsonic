@@ -111,11 +111,23 @@ export class LeadsService {
     return lead;
   }
 
-  async update(id: number, dto: UpdateLeadDto) {
-    await this.findOne(id);
+  async update(id: number, dto: UpdateLeadDto, actingUserId?: string) {
+    const existing = await this.findOne(id);
     const data: { status?: LeadStatus; assigneeId?: string | null } = {};
     if (dto.status !== undefined) data.status = dto.status;
     if (dto.assigneeId !== undefined) data.assigneeId = dto.assigneeId === '' ? null : dto.assigneeId;
+
+    // Auto-assign the acting user when status changes and lead has no assignee yet
+    // and the request did not explicitly pass an assigneeId.
+    if (
+      dto.status !== undefined &&
+      dto.assigneeId === undefined &&
+      !existing.assigneeId &&
+      actingUserId
+    ) {
+      data.assigneeId = actingUserId;
+    }
+
     return this.prisma.lead.update({
       where: { id },
       data,
@@ -188,14 +200,19 @@ export class LeadsService {
     };
   }
 
-  async daily(days: number) {
+  async daily(days: number, status?: string) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const start = new Date(today);
     start.setDate(start.getDate() - (days - 1));
 
+    const where: Prisma.LeadWhereInput = { createdAt: { gte: start } };
+    if (status && ['NEW', 'IN_PROGRESS', 'PLANNED', 'REJECTED', 'CONVERTED'].includes(status)) {
+      where.status = status as LeadStatus;
+    }
+
     const leads = await this.prisma.lead.findMany({
-      where: { createdAt: { gte: start } },
+      where,
       select: { createdAt: true },
     });
 

@@ -138,8 +138,14 @@ export function LeadsView() {
             ))}
           </Select>
 
-          <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} />
-          <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} />
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-700/60">{t("fromDate")}</span>
+            <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-700/60">{t("toDate")}</span>
+            <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} />
+          </label>
         </div>
 
         <div className="mt-3 flex items-center justify-end">

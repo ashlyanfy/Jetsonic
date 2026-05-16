@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ExternalLink, Mail, Phone, MessageCircle } from "lucide-react";
-import { api } from "@/lib/api";
+import { ArrowLeft, ExternalLink, Mail, Phone, MessageCircle, Download } from "lucide-react";
+import { api, downloadFile } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { formatDate } from "@/lib/utils";
 import type { Lead } from "@/lib/types";
@@ -104,6 +104,15 @@ export function LeadDetail({ id }: { id: string }) {
               <ExternalLink size={12} />
             </a>
           )}
+
+          <button
+            type="button"
+            onClick={() => downloadFile(`/leads/${lead.id}/export`, `lead-${lead.id}.xlsx`)}
+            className="inline-flex h-10 items-center gap-2 rounded-full border border-[rgba(6,44,73,0.12)] bg-white px-4 text-sm font-bold text-brand-700 transition hover:border-brand-700/30 hover:bg-brand-50"
+          >
+            <Download size={14} />
+            Excel
+          </button>
         </div>
       </header>
 

@@ -10,7 +10,9 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles, RolesGuard } from '../auth/roles.guard';
 import { PagesService } from './pages.service';
 
 interface CreatePageBody {
@@ -72,43 +74,50 @@ export class PagesController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   create(@Body() body: CreatePageBody) {
     return this.pages.createPage(body);
   }
 
   @Patch(':slug')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   update(@Param('slug') slug: string, @Body() body: UpdatePageBody) {
     return this.pages.updatePage(slug, body);
   }
 
   @Post(':slug/blocks')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   createBlock(@Param('slug') slug: string, @Body() body: CreateBlockBody) {
     return this.pages.createBlock(slug, body);
   }
 
   @Patch('blocks/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   updateBlock(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateBlockBody) {
     return this.pages.updateBlock(id, body);
   }
 
   @Delete('blocks/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   deleteBlock(@Param('id', ParseIntPipe) id: number) {
     return this.pages.deleteBlock(id);
   }
 
   @Post(':slug/blocks/reorder')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   reorderBlocks(@Param('slug') slug: string, @Body() body: { orderedIds: number[] }) {
     return this.pages.reorderBlocks(slug, body.orderedIds);
   }
 
   @Post(':slug/seo')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   upsertSeo(@Param('slug') slug: string, @Body() body: SeoBody) {
     return this.pages.upsertSeo(slug, body);
   }

@@ -2,30 +2,22 @@ import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { SubscribeDto, UnsubscribeDto } from './dto/subscribe.dto';
 import { PushService } from './push.service';
-
-interface SubscribeBody {
-  endpoint: string;
-  keys: { p256dh: string; auth: string };
-}
-
-interface UnsubscribeBody {
-  endpoint: string;
-}
 
 @Controller('push')
 export class NotificationsController {
   constructor(private readonly push: PushService) {}
 
+  // VAPID public key is intentionally public — required by browser to subscribe.
   @Get('public-key')
-  @UseGuards(JwtAuthGuard)
   publicKey() {
     return { publicKey: this.push.getPublicKey(), enabled: this.push.isConfigured() };
   }
 
   @Post('subscribe')
   @UseGuards(JwtAuthGuard)
-  subscribe(@Body() body: SubscribeBody, @CurrentUser() user: AuthUser) {
+  subscribe(@Body() body: SubscribeDto, @CurrentUser() user: AuthUser) {
     return this.push.subscribe(
       { endpoint: body.endpoint, p256dh: body.keys.p256dh, auth: body.keys.auth },
       user.id,
@@ -34,7 +26,7 @@ export class NotificationsController {
 
   @Delete('subscribe')
   @UseGuards(JwtAuthGuard)
-  unsubscribe(@Body() body: UnsubscribeBody) {
+  unsubscribe(@Body() body: UnsubscribeDto) {
     return this.push.unsubscribe(body.endpoint);
   }
 

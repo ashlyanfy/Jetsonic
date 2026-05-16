@@ -14,15 +14,20 @@ function readCookie(name: string): string | null {
   return match ? decodeURIComponent(match.slice(name.length + 1)) : null;
 }
 
+function cookieFlags(): string {
+  const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+  return `Path=/; SameSite=Lax;${isHttps ? " Secure;" : ""}`;
+}
+
 export function setToken(token: string) {
   if (typeof document === "undefined") return;
   const sevenDays = 60 * 60 * 24 * 7;
-  document.cookie = `${TOKEN_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=${sevenDays}; SameSite=Lax`;
+  document.cookie = `${TOKEN_COOKIE}=${encodeURIComponent(token)}; ${cookieFlags()} Max-Age=${sevenDays}`;
 }
 
 export function clearToken() {
   if (typeof document === "undefined") return;
-  document.cookie = `${TOKEN_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+  document.cookie = `${TOKEN_COOKIE}=; ${cookieFlags()} Max-Age=0`;
 }
 
 export function getToken(): string | null {

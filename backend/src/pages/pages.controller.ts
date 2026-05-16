@@ -13,37 +13,15 @@ import {
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles, RolesGuard } from '../auth/roles.guard';
+import {
+  CreateBlockDto,
+  CreatePageDto,
+  ReorderBlocksDto,
+  SeoDto,
+  UpdateBlockDto,
+  UpdatePageDto,
+} from './dto/page.dto';
 import { PagesService } from './pages.service';
-
-interface CreatePageBody {
-  slug: string;
-  title: string;
-}
-
-interface UpdatePageBody {
-  title?: string;
-}
-
-interface CreateBlockBody {
-  type: string;
-  order?: number;
-  enabled?: boolean;
-  data: unknown;
-}
-
-interface UpdateBlockBody {
-  type?: string;
-  enabled?: boolean;
-  order?: number;
-  data?: unknown;
-}
-
-interface SeoBody {
-  title: string;
-  description: string;
-  keywords?: string;
-  ogImage?: string;
-}
 
 @Controller('pages')
 export class PagesController {
@@ -76,28 +54,28 @@ export class PagesController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  create(@Body() body: CreatePageBody) {
+  create(@Body() body: CreatePageDto) {
     return this.pages.createPage(body);
   }
 
   @Patch(':slug')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  update(@Param('slug') slug: string, @Body() body: UpdatePageBody) {
+  update(@Param('slug') slug: string, @Body() body: UpdatePageDto) {
     return this.pages.updatePage(slug, body);
   }
 
   @Post(':slug/blocks')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  createBlock(@Param('slug') slug: string, @Body() body: CreateBlockBody) {
+  createBlock(@Param('slug') slug: string, @Body() body: CreateBlockDto) {
     return this.pages.createBlock(slug, body);
   }
 
   @Patch('blocks/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  updateBlock(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateBlockBody) {
+  updateBlock(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateBlockDto) {
     return this.pages.updateBlock(id, body);
   }
 
@@ -111,14 +89,14 @@ export class PagesController {
   @Post(':slug/blocks/reorder')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  reorderBlocks(@Param('slug') slug: string, @Body() body: { orderedIds: number[] }) {
+  reorderBlocks(@Param('slug') slug: string, @Body() body: ReorderBlocksDto) {
     return this.pages.reorderBlocks(slug, body.orderedIds);
   }
 
   @Post(':slug/seo')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  upsertSeo(@Param('slug') slug: string, @Body() body: SeoBody) {
+  upsertSeo(@Param('slug') slug: string, @Body() body: SeoDto) {
     return this.pages.upsertSeo(slug, body);
   }
 }

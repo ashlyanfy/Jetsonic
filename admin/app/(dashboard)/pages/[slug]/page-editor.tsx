@@ -248,21 +248,14 @@ function BlockRow({
       </div>
 
       {Object.keys(fields).length > 0 && (
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {Object.entries(draft).map(([key, value]) => (
-            <label key={key} className="flex flex-col gap-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-wide text-brand-700/60">{key}</span>
-              {value.length > 80 ? (
-                <textarea
-                  value={value}
-                  onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
-                  rows={3}
-                  className="w-full resize-y rounded-xl border border-[rgba(6,44,73,0.14)] bg-white px-3.5 py-2.5 text-sm text-brand-900 focus-visible:outline-none focus-visible:border-accent-500 focus-visible:ring-4 focus-visible:ring-accent-500/15"
-                />
-              ) : (
-                <Input value={value} onChange={(e) => setDraft({ ...draft, [key]: e.target.value })} />
-              )}
-            </label>
+        <div className="mt-4 space-y-4">
+          {groupFields(Object.entries(draft)).map((group) => (
+            <FieldGroup
+              key={group.title}
+              title={group.title}
+              entries={group.entries}
+              onChange={(key, value) => setDraft({ ...draft, [key]: value })}
+            />
           ))}
         </div>
       )}
@@ -295,4 +288,75 @@ function mergeFields(original: Record<string, unknown>, edits: Record<string, st
     next[key] = value;
   }
   return next;
+}
+
+/* ----- field grouping & nicer labels ----- */
+
+interface FieldGroupData {
+  title: string;
+  entries: Array<[string, string]>;
+}
+
+function groupFields(entries: Array<[string, string]>): FieldGroupData[] {
+  const groups = new Map<string, Array<[string, string]>>();
+  for (const [key, value] of entries) {
+    const m = key.match(/^(card|step|item|stat|meta|compare|check|route|orbit)_(\d{1,2})/i);
+    let groupKey = "Section";
+    if (m) {
+      const cap = m[1].charAt(0).toUpperCase() + m[1].slice(1);
+      groupKey = `${cap} ${parseInt(m[2], 10)}`;
+    }
+    if (!groups.has(groupKey)) groups.set(groupKey, []);
+    groups.get(groupKey)!.push([key, value]);
+  }
+  const ordered: FieldGroupData[] = [];
+  if (groups.has("Section")) ordered.push({ title: "Section", entries: groups.get("Section")! });
+  for (const [title, e] of groups) if (title !== "Section") ordered.push({ title, entries: e });
+  return ordered;
+}
+
+function humanLabel(key: string): string {
+  const stripped = key.replace(/^(card|step|item|stat|meta|compare|check|route|orbit)_\d{1,2}_?/i, "");
+  return (
+    stripped
+      .replace(/_/g, " ")
+      .replace(/\b(en|ar|href|cta|desc|alt|url|p\/?n)\b/gi, (m) => m.toUpperCase())
+      .replace(/^./, (c) => c.toUpperCase())
+      .trim() || key
+  );
+}
+
+function FieldGroup({
+  title,
+  entries,
+  onChange,
+}: {
+  title: string;
+  entries: Array<[string, string]>;
+  onChange: (key: string, value: string) => void;
+}) {
+  return (
+    <div className="rounded-xl border border-[rgba(6,44,73,0.06)] bg-brand-50/30 p-4">
+      <h3 className="mb-3 text-[11px] font-black uppercase tracking-[0.16em] text-brand-700">{title}</h3>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {entries.map(([key, value]) => (
+          <label key={key} className="flex flex-col gap-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-brand-700/60">
+              {humanLabel(key)}
+            </span>
+            {value.length > 80 ? (
+              <textarea
+                value={value}
+                onChange={(e) => onChange(key, e.target.value)}
+                rows={3}
+                className="w-full resize-y rounded-xl border border-[rgba(6,44,73,0.14)] bg-white px-3.5 py-2.5 text-sm text-brand-900 focus-visible:outline-none focus-visible:border-accent-500 focus-visible:ring-4 focus-visible:ring-accent-500/15"
+              />
+            ) : (
+              <Input value={value} onChange={(e) => onChange(key, e.target.value)} />
+            )}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
 }

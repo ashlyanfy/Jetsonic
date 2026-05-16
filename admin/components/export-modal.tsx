@@ -28,8 +28,8 @@ export function ExportModal({ open, onClose, baseFilters = {} }: ExportModalProp
       ? {
           title: "Экспорт в Excel",
           subtitle: "Выберите диапазон дат для выгрузки заявок.",
-          from: "С",
-          to: "По",
+          from: "Выбрать дату с",
+          to: "Выбрать дату по",
           all: "За всё время",
           download: "Скачать .xlsx",
           downloading: "Скачивается…",
@@ -42,8 +42,8 @@ export function ExportModal({ open, onClose, baseFilters = {} }: ExportModalProp
       : {
           title: "Export to Excel",
           subtitle: "Pick a date range to export leads.",
-          from: "From",
-          to: "To",
+          from: "Pick start date",
+          to: "Pick end date",
           all: "All time",
           download: "Download .xlsx",
           downloading: "Downloading…",

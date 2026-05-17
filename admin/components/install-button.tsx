@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Smartphone, X } from "lucide-react";
+import { Download, RefreshCw, Smartphone, X } from "lucide-react";
 import { useInstallPrompt } from "@/lib/install-prompt";
 import { useLang } from "@/lib/i18n";
 import { Button } from "./button";
@@ -59,8 +59,23 @@ export function InstallHint() {
 /** Sidebar item — explicit "Install on home screen" button. */
 export function InstallSidebarItem() {
   const { lang } = useLang();
-  const { canInstall, isIos, install } = useInstallPrompt();
+  const { canInstall, isIos, isStandalone, install } = useInstallPrompt();
   const [showHelp, setShowHelp] = useState(false);
+
+  // Show "Reload" button when running as installed PWA (no browser URL bar).
+  if (isStandalone) {
+    const reloadLabel = lang === "ru" ? "Обновить приложение" : "Reload app";
+    return (
+      <button
+        type="button"
+        onClick={() => window.location.reload()}
+        className="flex h-11 w-full items-center gap-3 rounded-2xl px-4 text-sm font-bold text-brand-900/70 transition hover:bg-brand-50 hover:text-brand-700"
+      >
+        <RefreshCw size={18} />
+        <span>{reloadLabel}</span>
+      </button>
+    );
+  }
 
   if (!canInstall) return null;
 

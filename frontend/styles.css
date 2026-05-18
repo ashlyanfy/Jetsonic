@@ -19,23 +19,18 @@ body[dir="rtl"] .check-list li{padding:14px 46px 14px 16px} body[dir="rtl"] .che
 .footer-phone{margin:6px 0 0}.footer-phone a{color:#fff!important;font-weight:900;display:inline-flex;align-items:center;gap:6px;text-decoration:none;opacity:.95;transition:.2s ease}.footer-phone a:hover{opacity:1;color:var(--accent)!important}
 .contact-direct{display:grid;gap:10px;margin:14px 0}.contact-direct a{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:18px;border:1px solid rgba(6,44,73,.10);background:#fff;color:var(--primary);text-decoration:none;transition:.2s ease}.contact-direct a:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(6,44,73,.10);border-color:var(--accent)}.contact-direct .contact-phone-icon{font-size:22px;line-height:1;flex-shrink:0}.contact-direct .contact-phone-text{display:flex;flex-direction:column;gap:2px;line-height:1.1}.contact-direct .contact-phone-text small{color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.contact-direct .contact-phone-text strong{color:var(--primary);font-size:18px;font-weight:900;letter-spacing:.01em}.contact-direct .contact-whatsapp{background:linear-gradient(135deg,#e7faec,#fff)}.contact-direct .contact-whatsapp:hover{border-color:#22c55e}
 
-/* Phone contact — make horizontal layout on all sizes */
-.contact-direct{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.contact-direct .contact-phone-text strong{white-space:nowrap;font-size:16px}
-.contact-direct a{padding:14px;min-width:0}
-@media(max-width:480px){
-  .contact-direct{gap:8px}
-  .contact-direct a{padding:10px 12px;gap:8px}
-  .contact-direct .contact-phone-icon{font-size:18px}
-  .contact-direct .contact-phone-text strong{font-size:14px;letter-spacing:0}
-  .contact-direct .contact-phone-text small{font-size:10px;letter-spacing:.08em}
+/* Phone contact cards — mobile-first: 1 column by default, 2 columns on desktop */
+.contact-direct{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:10px;
+  margin:14px 0;
 }
+.contact-direct a{padding:14px 16px;gap:12px;flex-direction:row;align-items:center;min-width:0}
+.contact-direct .contact-phone-icon{font-size:22px}
+.contact-direct .contact-phone-text strong{white-space:nowrap;font-size:18px;letter-spacing:.01em}
+.contact-direct .contact-phone-text small{font-size:12px;letter-spacing:.1em}
 
-/* Phone contact — vertical stack on mobile (override earlier two-column rule) */
-@media(max-width:760px){
-  .contact-direct{grid-template-columns:1fr;gap:10px}
-  .contact-direct a{padding:14px 16px;gap:12px;flex-direction:row;align-items:center}
-  .contact-direct .contact-phone-icon{font-size:22px}
-  .contact-direct .contact-phone-text strong{font-size:18px;letter-spacing:.01em;white-space:nowrap}
-  .contact-direct .contact-phone-text small{font-size:12px;letter-spacing:.1em}
+@media(min-width:1024px){
+  .contact-direct{grid-template-columns:1fr 1fr !important}
 }

@@ -30,3 +30,12 @@ body[dir="rtl"] .check-list li{padding:14px 46px 14px 16px} body[dir="rtl"] .che
   .contact-direct .contact-phone-text strong{font-size:14px;letter-spacing:0}
   .contact-direct .contact-phone-text small{font-size:10px;letter-spacing:.08em}
 }
+
+/* Phone contact — vertical stack on mobile (override earlier two-column rule) */
+@media(max-width:760px){
+  .contact-direct{grid-template-columns:1fr;gap:10px}
+  .contact-direct a{padding:14px 16px;gap:12px;flex-direction:row;align-items:center}
+  .contact-direct .contact-phone-icon{font-size:22px}
+  .contact-direct .contact-phone-text strong{font-size:18px;letter-spacing:.01em;white-space:nowrap}
+  .contact-direct .contact-phone-text small{font-size:12px;letter-spacing:.1em}
+}

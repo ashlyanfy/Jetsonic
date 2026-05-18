@@ -23,10 +23,11 @@ const PAGES: PageSeed[] = [
     slug: 'home',
     title: 'Home',
     seo: {
-      title: 'Jetsonic Trading FZCO | Aircraft Parts RFQ and AOG Support',
+      title: 'Jetsonic Trading FZCO | Aircraft Parts & AOG Support in Dubai',
       description:
-        'Dubai based aircraft parts sourcing, AOG support, RFQ intake and documentation control for aviation buyers.',
-      keywords: 'aircraft parts, AOG, RFQ, FAA 8130-3, EASA Form 1, Dubai aviation, parts sourcing',
+        'Dubai-based aircraft parts trading FZCO. AOG response 24/7, RFQ handling, FAA 8130-3 & EASA Form 1 documentation. Sourcing across US, Europe, UAE, Kazakhstan and Central Asia.',
+      keywords:
+        'aircraft parts Dubai, aircraft parts UAE, AOG support Dubai, AOG support Middle East, RFQ aviation, RFQ aircraft parts, aircraft components supplier, aviation sourcing Dubai, FAA 8130-3 parts, EASA Form 1 parts, certified aircraft parts, aviation logistics Dubai, aircraft spares UAE, helicopter parts Dubai, aircraft parts trader, aviation procurement Dubai, IFZA Business Park aviation, Dubai Silicon Oasis aviation, Jetsonic Trading, Jetsonic FZCO, aviation supply Kazakhstan, aircraft parts Central Asia, aviation parts broker, used serviceable material UAE, USM aviation Dubai, aircraft rotables Dubai, aviation consumables supplier, aircraft tools GSE Dubai',
     },
     blocks: [
       // 1. Hero
@@ -319,10 +320,11 @@ const PAGES: PageSeed[] = [
     slug: 'about',
     title: 'Company',
     seo: {
-      title: 'About Jetsonic Trading FZCO | Aviation Sourcing in Dubai',
+      title: 'About Jetsonic Trading FZCO | Dubai Aviation Sourcing Company',
       description:
-        'Jetsonic Trading FZCO supports aircraft parts sourcing, AOG response and documentation discipline from a Dubai base.',
-      keywords: 'Jetsonic Trading FZCO, Dubai aviation company, aircraft parts trader, FZCO aviation',
+        'Jetsonic Trading FZCO operates from Dubai Silicon Oasis. Lean aviation sourcing for airlines, MRO centers, operators and brokers across Kazakhstan, Central Asia and the Middle East.',
+      keywords:
+        'Jetsonic Trading FZCO, Dubai aviation company, IFZA Business Park, Dubai Silicon Oasis aviation, FZCO aviation, aviation trader Dubai, aircraft parts business UAE, aviation sourcing company, Dubai aircraft broker, Middle East aviation trader, Central Asia aviation parts, Kazakhstan aviation supplier',
     },
     blocks: [
       {
@@ -412,10 +414,11 @@ const PAGES: PageSeed[] = [
     slug: 'aog',
     title: 'AOG',
     seo: {
-      title: 'AOG Support | Jetsonic Trading FZCO',
+      title: 'AOG Support 24/7 in Dubai | Urgent Aircraft Parts | Jetsonic',
       description:
-        'Aircraft On Ground urgent parts sourcing and documentation review from Dubai. Submit AOG requests with full technical data.',
-      keywords: 'AOG, aircraft on ground, urgent parts, AOG sourcing Dubai',
+        'Aircraft On Ground urgent parts sourcing from Dubai. Fast supplier search, certificate review and logistics for grounded aircraft. Submit AOG request with part number and target time.',
+      keywords:
+        'AOG support, AOG Dubai, aircraft on ground, urgent aircraft parts, AOG 24/7, AOG sourcing UAE, grounded aircraft parts, emergency aviation parts, AOG response Middle East, AOG service Kazakhstan, fast aircraft spares, AOG request form, AOG documentation, urgent FAA EASA parts, aircraft downtime parts',
     },
     blocks: [
       {
@@ -511,10 +514,11 @@ const PAGES: PageSeed[] = [
     slug: 'parts',
     title: 'Parts',
     seo: {
-      title: 'Aircraft Parts Sourcing | Jetsonic Trading FZCO',
+      title: 'Aircraft Parts Sourcing | Rotables, USM, Tools | Jetsonic Dubai',
       description:
-        'Sourcing for new, serviceable, overhauled and repairable aircraft parts with FAA 8130-3 and EASA Form 1 alignment.',
-      keywords: 'aircraft parts sourcing, serviceable parts, overhauled parts, FAA 8130-3, EASA Form 1',
+        'Rotables, USM, consumables, GSE and certified aviation components. FAA 8130-3 and EASA Form 1 alignment for every request. Send part number and get a structured quote.',
+      keywords:
+        'aircraft rotables, aircraft consumables, USM aircraft parts, used serviceable material, aviation expendables, aircraft components supplier, aircraft hydraulic parts, aircraft avionics, landing gear parts, aircraft fuel system parts, aircraft control units, aviation O rings, aircraft fasteners, aviation chemicals, aircraft GSE, ground support equipment Dubai, aviation tools supplier, certified aircraft parts UAE, overhauled aircraft components, serviceable aircraft parts Dubai',
     },
     blocks: [
       {
@@ -630,10 +634,11 @@ const PAGES: PageSeed[] = [
     slug: 'services',
     title: 'Services',
     seo: {
-      title: 'Services | Jetsonic Trading FZCO',
+      title: 'Aviation Services: RFQ, AOG, Documents & Logistics | Jetsonic',
       description:
-        'RFQ handling, supplier search, document control and delivery coordination for aviation buyers.',
-      keywords: 'aviation services, RFQ handling, supplier search, document control',
+        'RFQ workflow, supplier search across US, Europe and UAE. Certificate and document control. DHL, FedEx, Aramex and Emirates SkyCargo delivery coordination from Dubai.',
+      keywords:
+        'aviation RFQ workflow, aviation supplier search, aircraft parts logistics, DHL aircraft parts, FedEx aviation, Emirates SkyCargo parts, aviation document control, aircraft certificate alignment, aviation procurement service, aviation broker Dubai, supplier comparison aviation, aviation delivery coordination, aircraft parts shipping UAE',
     },
     blocks: [
       {
@@ -694,10 +699,11 @@ const PAGES: PageSeed[] = [
     slug: 'quality',
     title: 'Quality',
     seo: {
-      title: 'Quality and Documentation | Jetsonic Trading FZCO',
+      title: 'FAA 8130-3, EASA Form 1, CoC | Aviation Documentation | Jetsonic',
       description:
-        'Document discipline for FAA 8130-3, EASA Form 1, CoC and traceability across aircraft parts requests.',
-      keywords: 'quality control aviation, FAA 8130-3, EASA Form 1, CoC, traceability',
+        'Document discipline for every aircraft parts request: FAA 8130-3, EASA Form 1, Certificate of Conformity, traceability and shipping paperwork. Compliance-first sourcing from Dubai.',
+      keywords:
+        'FAA 8130-3, EASA Form 1, certificate of conformity aviation, CoC aviation, aircraft parts traceability, aviation documentation, aviation compliance Dubai, aircraft release documents, aviation airworthiness, MRO documentation, aircraft quality control, aviation regulatory compliance, FAA documentation, EASA documentation, JAA aircraft certificate',
     },
     blocks: [
       {
@@ -748,10 +754,11 @@ const PAGES: PageSeed[] = [
     slug: 'contact',
     title: 'Contact',
     seo: {
-      title: 'Contact and RFQ Form | Jetsonic Trading FZCO',
+      title: 'Contact & RFQ Form | Aircraft Parts Request | Jetsonic Dubai',
       description:
-        'Send an aircraft parts RFQ or AOG request with part number, urgency and certificate requirements.',
-      keywords: 'aviation RFQ form, AOG request, contact Jetsonic',
+        'Send an RFQ or AOG request. Part number, aircraft type, ATA chapter, urgency and delivery point. Direct line +971 58 549 0059. Dubai Silicon Oasis, UAE.',
+      keywords:
+        'aviation RFQ form, AOG request form, aircraft parts request Dubai, send RFQ aviation, aircraft parts quote, contact aircraft parts supplier, Jetsonic contact, Dubai aircraft trader phone, aviation supplier UAE contact, Jetsonic WhatsApp, +971 aviation parts',
     },
     blocks: [
       {

@@ -84,7 +84,13 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
                 className="h-10 w-auto rounded-2xl object-contain"
               />
               <span className="mt-1 text-[12px] font-bold uppercase tracking-[0.15em] text-accent-600">
-                {lang === "ru" ? "Админ" : "Admin"}
+                {lang === "ru"
+                  ? isAdmin
+                    ? "Админ"
+                    : "Менеджер"
+                  : isAdmin
+                    ? "Admin"
+                    : "Manager"}
               </span>
             </div>
           </div>

@@ -68,11 +68,11 @@ export function LeadEditForm({ lead, onClose }: { lead: Lead; onClose: () => voi
     lang === "ru"
       ? {
           title: "Редактирование заявки",
-          subtitle: "Поля анкеты и контактные данные клиента.",
-          contact: "Контакт",
-          request: "Запрос",
+          subtitle: "Все поля анкеты и контактные данные клиента.",
+          contact: "Контактные данные",
+          request: "Детали запроса",
           message: "Сообщение клиента",
-          save: "Сохранить изменения",
+          save: "Сохранить",
           saving: "Сохранение…",
           cancel: "Отмена",
           fields: {
@@ -98,11 +98,11 @@ export function LeadEditForm({ lead, onClose }: { lead: Lead; onClose: () => voi
         }
       : {
           title: "Edit lead",
-          subtitle: "Lead fields and customer contact details.",
-          contact: "Contact",
-          request: "Request",
+          subtitle: "All lead fields and customer contact details.",
+          contact: "Contact details",
+          request: "Request details",
           message: "Customer message",
-          save: "Save changes",
+          save: "Save",
           saving: "Saving…",
           cancel: "Cancel",
           fields: {
@@ -129,7 +129,6 @@ export function LeadEditForm({ lead, onClose }: { lead: Lead; onClose: () => voi
 
   const save = useMutation({
     mutationFn: () => {
-      // Send only fields that actually changed.
       const original = toDraft(lead);
       const changes: Partial<Record<EditableKey, string | null>> = {};
       (Object.keys(draft) as EditableKey[]).forEach((key) => {
@@ -138,7 +137,6 @@ export function LeadEditForm({ lead, onClose }: { lead: Lead; onClose: () => voi
         }
       });
       if ("targetDate" in changes) {
-        // empty string -> null so backend nulls the column
         changes.targetDate = changes.targetDate ? changes.targetDate : null;
       }
       return api(`/leads/${lead.id}`, {
@@ -154,12 +152,15 @@ export function LeadEditForm({ lead, onClose }: { lead: Lead; onClose: () => voi
     onError: (err) => setError(err instanceof ApiError ? err.message : "Failed to save"),
   });
 
-  function field(key: EditableKey, type: "text" | "email" | "tel" | "date" | "textarea" | "select-urgency" | "select-type" = "text") {
+  function field(
+    key: EditableKey,
+    type: "text" | "email" | "tel" | "date" | "textarea" | "select-urgency" | "select-type" = "text",
+  ) {
     const value = draft[key] ?? "";
     const update = (v: string) => setDraft({ ...draft, [key]: v });
 
     return (
-      <label className="flex flex-col gap-1.5">
+      <label className="flex min-w-0 flex-col gap-1.5">
         <span className="text-[11px] font-bold uppercase tracking-wide text-brand-700/60">
           {labels.fields[key]}
         </span>
@@ -168,10 +169,10 @@ export function LeadEditForm({ lead, onClose }: { lead: Lead; onClose: () => voi
             value={value}
             onChange={(e) => update(e.target.value)}
             rows={4}
-            className="w-full resize-y rounded-xl border border-[rgba(6,44,73,0.14)] bg-white px-3.5 py-2.5 text-sm text-brand-900 focus-visible:outline-none focus-visible:border-accent-500 focus-visible:ring-4 focus-visible:ring-accent-500/15"
+            className="w-full min-w-0 resize-y rounded-xl border border-[rgba(6,44,73,0.14)] bg-white px-3.5 py-2.5 text-sm text-brand-900 focus-visible:outline-none focus-visible:border-accent-500 focus-visible:ring-4 focus-visible:ring-accent-500/15"
           />
         ) : type === "select-urgency" ? (
-          <Select value={value} onChange={(e) => update(e.target.value)}>
+          <Select value={value} onChange={(e) => update(e.target.value)} className="min-w-0">
             <option value="">—</option>
             {URGENCIES.map((u) => (
               <option key={u} value={u}>
@@ -180,7 +181,7 @@ export function LeadEditForm({ lead, onClose }: { lead: Lead; onClose: () => voi
             ))}
           </Select>
         ) : type === "select-type" ? (
-          <Select value={value} onChange={(e) => update(e.target.value)}>
+          <Select value={value} onChange={(e) => update(e.target.value)} className="min-w-0">
             <option value="">—</option>
             {REQUEST_TYPES.map((u) => (
               <option key={u} value={u}>
@@ -189,7 +190,12 @@ export function LeadEditForm({ lead, onClose }: { lead: Lead; onClose: () => voi
             ))}
           </Select>
         ) : (
-          <Input type={type} value={value} onChange={(e) => update(e.target.value)} />
+          <Input
+            type={type}
+            value={value}
+            onChange={(e) => update(e.target.value)}
+            className="min-w-0"
+          />
         )}
       </label>
     );
@@ -202,73 +208,84 @@ export function LeadEditForm({ lead, onClose }: { lead: Lead; onClose: () => voi
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-brand-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-stretch justify-center bg-brand-900/40 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      onClick={onClose}
+    >
       <div
-        className="my-8 w-full max-w-3xl rounded-[28px] border border-[rgba(6,44,73,0.08)] bg-white p-7 shadow-[0_28px_70px_rgba(6,44,73,0.20)]"
+        className="flex h-full w-full max-w-3xl flex-col overflow-hidden bg-white shadow-[0_28px_70px_rgba(6,44,73,0.20)] sm:h-auto sm:max-h-[90vh] sm:rounded-[28px] sm:border sm:border-[rgba(6,44,73,0.08)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-black tracking-tight text-brand-700">{labels.title}</h2>
-            <p className="mt-1 text-sm text-brand-700/60">{labels.subtitle}</p>
+        {/* Header — sticky */}
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[rgba(6,44,73,0.08)] bg-white px-5 py-4 sm:px-7 sm:py-5">
+          <div className="min-w-0">
+            <h2 className="truncate text-lg font-black tracking-tight text-brand-700 sm:text-2xl">
+              {labels.title}
+            </h2>
+            <p className="mt-0.5 truncate text-xs text-brand-700/60 sm:text-sm">{labels.subtitle}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-brand-700/50 hover:bg-brand-50 hover:text-brand-700"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-brand-700/50 hover:bg-brand-50 hover:text-brand-700"
+            aria-label="Close"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <fieldset className="space-y-3 rounded-2xl border border-[rgba(6,44,73,0.06)] bg-brand-50/30 p-4">
-            <legend className="px-2 text-[11px] font-black uppercase tracking-[0.16em] text-brand-700">
-              {labels.contact}
-            </legend>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {field("name")}
-              {field("company")}
-              {field("email", "email")}
-              {field("phone", "tel")}
-              {field("role")}
-            </div>
-          </fieldset>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          {/* Scrollable body */}
+          <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
+            <fieldset className="space-y-3 rounded-2xl border border-[rgba(6,44,73,0.06)] bg-brand-50/30 p-4">
+              <legend className="px-2 text-[11px] font-black uppercase tracking-[0.16em] text-brand-700">
+                {labels.contact}
+              </legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {field("name")}
+                {field("company")}
+                {field("email", "email")}
+                {field("phone", "tel")}
+                {field("role")}
+              </div>
+            </fieldset>
 
-          <fieldset className="space-y-3 rounded-2xl border border-[rgba(6,44,73,0.06)] bg-brand-50/30 p-4">
-            <legend className="px-2 text-[11px] font-black uppercase tracking-[0.16em] text-brand-700">
-              {labels.request}
-            </legend>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {field("requestType", "select-type")}
-              {field("urgency", "select-urgency")}
-              {field("partNumber")}
-              {field("altPartNumber")}
-              {field("aircraftType")}
-              {field("tailNumber")}
-              {field("ataChapter")}
-              {field("quantity")}
-              {field("condition")}
-              {field("certificate")}
-              {field("targetDate", "date")}
-              {field("deliveryLocation")}
-            </div>
-          </fieldset>
+            <fieldset className="space-y-3 rounded-2xl border border-[rgba(6,44,73,0.06)] bg-brand-50/30 p-4">
+              <legend className="px-2 text-[11px] font-black uppercase tracking-[0.16em] text-brand-700">
+                {labels.request}
+              </legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {field("requestType", "select-type")}
+                {field("urgency", "select-urgency")}
+                {field("partNumber")}
+                {field("altPartNumber")}
+                {field("aircraftType")}
+                {field("tailNumber")}
+                {field("ataChapter")}
+                {field("quantity")}
+                {field("condition")}
+                {field("certificate")}
+                {field("targetDate", "date")}
+                {field("deliveryLocation")}
+              </div>
+            </fieldset>
 
-          <fieldset className="space-y-3 rounded-2xl border border-[rgba(6,44,73,0.06)] bg-brand-50/30 p-4">
-            <legend className="px-2 text-[11px] font-black uppercase tracking-[0.16em] text-brand-700">
-              {labels.message}
-            </legend>
-            {field("message", "textarea")}
-          </fieldset>
+            <fieldset className="space-y-3 rounded-2xl border border-[rgba(6,44,73,0.06)] bg-brand-50/30 p-4">
+              <legend className="px-2 text-[11px] font-black uppercase tracking-[0.16em] text-brand-700">
+                {labels.message}
+              </legend>
+              {field("message", "textarea")}
+            </fieldset>
 
-          {error && (
-            <p className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">
-              {error}
-            </p>
-          )}
+            {error && (
+              <p className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">
+                {error}
+              </p>
+            )}
+          </div>
 
-          <div className="flex flex-wrap justify-end gap-2">
+          {/* Footer — always visible */}
+          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[rgba(6,44,73,0.08)] bg-white px-5 py-4 sm:px-7">
             <Button type="button" variant="secondary" onClick={onClose}>
               {labels.cancel}
             </Button>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { MobileTopbar } from "@/components/mobile-topbar";
 import { DesktopTopbar } from "@/components/desktop-topbar";
+import { AppVersionWatcher } from "@/components/app-version";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -17,6 +18,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <DesktopTopbar />
         <main>{children}</main>
       </div>
+
+      <AppVersionWatcher />
     </>
   );
 }

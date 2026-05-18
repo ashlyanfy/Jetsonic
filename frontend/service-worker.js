@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jetsonic-pwa-v9';
+const CACHE_NAME = 'jetsonic-pwa-v10';
 const ASSETS = ['/', '/parts/', '/services/', '/aog/', '/quality/', '/about/', '/contact/', '/thank-you.html', '/offline.html', '/styles.css', '/app.js', '/cms.js', '/manifest.webmanifest', '/assets/jetsonic_trade_logo.png', '/assets/logo.svg', '/assets/hero-aircraft.jpg', '/assets/icon-192.png', '/assets/icon-512.png'];
 
 self.addEventListener('install', event => {

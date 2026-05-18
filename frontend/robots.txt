@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /thank-you.html
+Disallow: /offline.html
+
+Sitemap: https://jetsonictrade.ae/sitemap.xml

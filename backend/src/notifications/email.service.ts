@@ -1,74 +1,68 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import * as dns from 'dns';
-import * as nodemailer from 'nodemailer';
 import type { Lead } from '@prisma/client';
 
 /**
- * Sends email notifications via SMTP.
- * Requires env vars:
- *   SMTP_HOST      — smtp.gmail.com
- *   SMTP_PORT      — 587
- *   SMTP_USER      — your gmail address
- *   SMTP_PASSWORD  — Gmail App Password (16 chars)
- *   MAIL_FROM      — "Jetsonic <sales@jetsonic.aero>"
- *   MAIL_TO        — sales@jetsonic.aero,s.zmeykov@jetsonic.aero
+ * Sends email notifications via Resend HTTP API.
+ * No SMTP — works on Railway without any port restrictions.
+ *
+ * Required env vars:
+ *   RESEND_API_KEY  — re_xxxx (from resend.com → API Keys)
+ *   MAIL_FROM       — "Jetsonic <sales@jetsonic.aero>"
+ *   MAIL_TO         — sales@jetsonic.aero,s.zmeykov@jetsonic.aero
  */
 @Injectable()
 export class EmailService implements OnModuleInit {
   private readonly logger = new Logger(EmailService.name);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private transporter: any = null;
 
   onModuleInit() {
-    // Railway does not support IPv6 — force IPv4 for all DNS lookups
-    dns.setDefaultResultOrder('ipv4first');
-
-    if (!this.isConfigured()) {
-      const missing: string[] = [];
-      if (!process.env.SMTP_HOST) missing.push('SMTP_HOST');
-      if (!process.env.SMTP_USER) missing.push('SMTP_USER');
-      if (!process.env.SMTP_PASSWORD) missing.push('SMTP_PASSWORD');
-      this.logger.warn(`Email disabled — missing env: ${missing.join(', ')}`);
+    if (!process.env.RESEND_API_KEY) {
+      this.logger.warn('Email disabled — missing env: RESEND_API_KEY');
       return;
     }
-
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT ?? 587),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
-      },
-      connectionTimeout: 10_000,
-      greetingTimeout: 10_000,
-      socketTimeout: 15_000,
-    });
-
-    this.logger.log(`Email notifications configured (${process.env.SMTP_USER})`);
+    this.logger.log('Email notifications configured (Resend)');
   }
 
   isConfigured(): boolean {
-    return !!(
-      process.env.SMTP_HOST &&
-      process.env.SMTP_USER &&
-      process.env.SMTP_PASSWORD
-    );
+    return !!process.env.RESEND_API_KEY;
   }
 
   async sendNewLead(lead: Lead): Promise<void> {
-    if (!this.transporter) {
+    if (!this.isConfigured()) {
       this.logger.debug('Email not configured, skipping');
       return;
     }
 
+    const to = (process.env.MAIL_TO ?? '')
+      .split(',')
+      .map((e) => e.trim())
+      .filter(Boolean);
+
+    if (!to.length) {
+      this.logger.warn('MAIL_TO is empty — skipping email');
+      return;
+    }
+
     try {
-      await this.transporter.sendMail({
-        from: process.env.MAIL_FROM ?? process.env.SMTP_USER,
-        to: process.env.MAIL_TO ?? process.env.SMTP_USER,
-        subject: this.buildSubject(lead),
-        html: this.buildHtml(lead),
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: process.env.MAIL_FROM ?? 'Jetsonic <onboarding@resend.dev>',
+          to,
+          subject: this.buildSubject(lead),
+          html: this.buildHtml(lead),
+        }),
       });
+
+      if (!res.ok) {
+        const body = await res.text();
+        this.logger.error(`Resend error ${res.status}: ${body}`);
+        return;
+      }
+
       this.logger.log(`Email notification sent for lead #${lead.id}`);
     } catch (err) {
       this.logger.error(`Email send error: ${(err as Error).message}`);
@@ -94,8 +88,8 @@ export class EmailService implements OnModuleInit {
     const row = (label: string, value: string | null | undefined) =>
       value
         ? `<tr>
-             <td style="padding:6px 12px;color:#6b7280;font-size:13px;white-space:nowrap">${label}</td>
-             <td style="padding:6px 12px;font-size:14px;color:#111827">${esc(value)}</td>
+            <td style="padding:6px 12px;color:#6b7280;font-size:13px;white-space:nowrap">${label}</td>
+            <td style="padding:6px 12px;font-size:14px;color:#111827">${esc(value)}</td>
            </tr>`
         : '';
 

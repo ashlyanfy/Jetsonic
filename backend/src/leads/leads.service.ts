@@ -3,6 +3,7 @@ import { Lead, LeadStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PushService } from '../notifications/push.service';
 import { TelegramService } from '../notifications/telegram.service';
+import { EmailService } from '../notifications/email.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { ListLeadsDto } from './dto/list-leads.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
@@ -21,6 +22,7 @@ export class LeadsService {
     private readonly prisma: PrismaService,
     private readonly push: PushService,
     private readonly telegram: TelegramService,
+    private readonly email: EmailService,
   ) {}
 
   async create(dto: CreateLeadDto, ctx: CreateLeadContext): Promise<Lead> {
@@ -55,6 +57,7 @@ export class LeadsService {
     // Fire-and-forget notifications — do not block the response.
     this.telegram.sendNewLead(lead).catch((e) => this.logger.warn(`Telegram: ${e.message}`));
     this.push.notifyNewLead(lead).catch((e) => this.logger.warn(`Push: ${e.message}`));
+    this.email.sendNewLead(lead).catch((e) => this.logger.warn(`Email: ${e.message}`));
 
     return lead;
   }

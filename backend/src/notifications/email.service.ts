@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { createTransport, Transporter } from 'nodemailer';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import type { Lead } from '@prisma/client';
 
 /**
@@ -15,7 +16,7 @@ import type { Lead } from '@prisma/client';
 @Injectable()
 export class EmailService implements OnModuleInit {
   private readonly logger = new Logger(EmailService.name);
-  private transporter: Transporter | null = null;
+  private transporter: Transporter<SMTPTransport.SentMessageInfo> | null = null;
 
   onModuleInit() {
     if (!this.isConfigured()) {
@@ -27,7 +28,7 @@ export class EmailService implements OnModuleInit {
       return;
     }
 
-    this.transporter = createTransport({
+    this.transporter = createTransport(new SMTPTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT ?? 587),
       secure: false,
@@ -36,7 +37,7 @@ export class EmailService implements OnModuleInit {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD,
       },
-    });
+    }));
 
     this.logger.log(`Email notifications configured (${process.env.SMTP_USER})`);
   }

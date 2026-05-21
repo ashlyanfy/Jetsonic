@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://jetsonictrade.ae/</loc>
+    <loc>https://jetsonic.aero/</loc>
     <priority>1.0</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://jetsonictrade.ae/about/</loc>
+    <loc>https://jetsonic.aero/about/</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://jetsonictrade.ae/aog/</loc>
+    <loc>https://jetsonic.aero/aog/</loc>
     <priority>0.9</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://jetsonictrade.ae/parts/</loc>
+    <loc>https://jetsonic.aero/parts/</loc>
     <priority>0.9</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://jetsonictrade.ae/services/</loc>
+    <loc>https://jetsonic.aero/services/</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://jetsonictrade.ae/quality/</loc>
+    <loc>https://jetsonic.aero/quality/</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://jetsonictrade.ae/contact/</loc>
+    <loc>https://jetsonic.aero/contact/</loc>
     <priority>0.9</priority>
     <changefreq>monthly</changefreq>
   </url>

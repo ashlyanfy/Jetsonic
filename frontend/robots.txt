@@ -3,4 +3,4 @@ Allow: /
 Disallow: /thank-you.html
 Disallow: /offline.html
 
-Sitemap: https://jetsonictrade.ae/sitemap.xml
+Sitemap: https://jetsonic.aero/sitemap.xml

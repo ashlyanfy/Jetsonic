@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ExternalLink, Mail, Phone, MessageCircle, Download, Pencil } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, ExternalLink, Mail, Phone, MessageCircle, Download, Pencil, Trash2 } from "lucide-react";
 import { api, downloadFile } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { formatDate } from "@/lib/utils";
@@ -17,6 +18,18 @@ import { LeadEditForm } from "@/components/lead-edit-form";
 export function LeadDetail({ id }: { id: string }) {
   const { t, lang } = useLang();
   const [editing, setEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: () => api(`/leads/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
+      router.push("/leads");
+    },
+  });
+
   const query = useQuery({
     queryKey: ["lead", id],
     queryFn: () => api<Lead>(`/leads/${id}`),
@@ -124,10 +137,57 @@ export function LeadDetail({ id }: { id: string }) {
             <Pencil size={14} />
             {lang === "ru" ? "Редактировать" : "Edit"}
           </button>
+
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(true)}
+            className="inline-flex h-10 items-center gap-2 rounded-full border border-red-200 bg-white px-4 text-sm font-bold text-red-600 transition hover:bg-red-50 hover:border-red-300"
+          >
+            <Trash2 size={14} />
+            {lang === "ru" ? "Удалить" : "Delete"}
+          </button>
         </div>
       </header>
 
       {editing && <LeadEditForm lead={lead} onClose={() => setEditing(false)} />}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white p-8 shadow-[0_28px_70px_rgba(6,44,73,0.18)]">
+            <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+              <Trash2 size={22} className="text-red-600" />
+            </div>
+            <h2 className="mt-4 text-lg font-black text-brand-700">
+              {lang === "ru" ? "Удалить заявку?" : "Delete lead?"}
+            </h2>
+            <p className="mt-2 text-sm text-brand-700/70">
+              {lang === "ru"
+                ? `Заявка #${lead.id} от ${lead.name} будет удалена безвозвратно.`
+                : `Lead #${lead.id} from ${lead.name} will be permanently deleted.`}
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                disabled={deleteMutation.isPending}
+                className="flex-1 rounded-full border border-[rgba(6,44,73,0.12)] bg-white py-2.5 text-sm font-bold text-brand-700 transition hover:bg-brand-50 disabled:opacity-50"
+              >
+                {lang === "ru" ? "Отмена" : "Cancel"}
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteMutation.mutate()}
+                disabled={deleteMutation.isPending}
+                className="flex-1 rounded-full bg-red-600 py-2.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(220,38,38,0.30)] transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleteMutation.isPending
+                  ? (lang === "ru" ? "Удаление..." : "Deleting...")
+                  : (lang === "ru" ? "Да, удалить" : "Yes, delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="grid gap-6 lg:grid-cols-2">
         <Card title={sectionLabels.contact}>

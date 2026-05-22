@@ -1,25 +1,25 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import type { Lead } from '@prisma/client';
+import { SettingsService, SETTING_KEYS } from '../settings/settings.service';
 
 /**
  * Sends Telegram messages via the official Bot API.
  * Requires env vars:
  *   TELEGRAM_BOT_TOKEN  — secret bot token from @BotFather
- *   TELEGRAM_CHAT_ID    — target chat id (user, group, or channel)
+ *   TELEGRAM_CHAT_ID    — fallback chat id (overridden by DB setting if set via admin panel)
  *   ADMIN_BASE_URL      — optional, used to build the lead detail link
  */
 @Injectable()
 export class TelegramService implements OnModuleInit {
   private readonly logger = new Logger(TelegramService.name);
 
+  constructor(private readonly settingsService: SettingsService) {}
+
   onModuleInit() {
-    if (this.isConfigured()) {
-      this.logger.log(`Telegram notifications configured (chat ${this.chatId})`);
+    if (this.token) {
+      this.logger.log('Telegram notifications configured (chat ID from DB or env)');
     } else {
-      const missing: string[] = [];
-      if (!this.token) missing.push('TELEGRAM_BOT_TOKEN');
-      if (!this.chatId) missing.push('TELEGRAM_CHAT_ID');
-      this.logger.warn(`Telegram disabled — missing env: ${missing.join(', ')}`);
+      this.logger.warn('Telegram disabled — missing env: TELEGRAM_BOT_TOKEN');
     }
   }
 
@@ -27,21 +27,26 @@ export class TelegramService implements OnModuleInit {
     return process.env.TELEGRAM_BOT_TOKEN ?? '';
   }
 
-  private get chatId() {
-    return process.env.TELEGRAM_CHAT_ID ?? '';
-  }
-
   private get adminBaseUrl() {
     return process.env.ADMIN_BASE_URL ?? 'https://admin-jetsonic.up.railway.app';
   }
 
-  isConfigured() {
-    return !!(this.token && this.chatId);
+  /** Returns chat ID from DB (set via admin panel) or falls back to env var */
+  private async resolveChatId(): Promise<string> {
+    const fromDb = await this.settingsService.get(SETTING_KEYS.TELEGRAM_CHAT_ID);
+    if (fromDb && fromDb.trim()) return fromDb.trim();
+    return process.env.TELEGRAM_CHAT_ID ?? '';
   }
 
   async sendNewLead(lead: Lead) {
-    if (!this.isConfigured()) {
+    if (!this.token) {
       this.logger.debug('Telegram not configured, skipping');
+      return;
+    }
+
+    const chatId = await this.resolveChatId();
+    if (!chatId) {
+      this.logger.warn('Telegram chat ID not set — skipping. Set it in admin panel Settings or TELEGRAM_CHAT_ID env var.');
       return;
     }
 
@@ -55,7 +60,7 @@ export class TelegramService implements OnModuleInit {
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
         body: JSON.stringify({
-          chat_id: this.chatId,
+          chat_id: chatId,
           text,
           parse_mode: 'HTML',
           disable_web_page_preview: true,

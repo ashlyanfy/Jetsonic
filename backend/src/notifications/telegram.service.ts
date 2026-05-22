@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import type { Lead } from '@prisma/client';
 import { SettingsService, SETTING_KEYS } from '../settings/settings.service';
+import { withRetry } from './retry.util';
 
 /**
  * Sends Telegram messages via the official Bot API.
@@ -53,30 +54,30 @@ export class TelegramService implements OnModuleInit {
     const text = this.formatLead(lead);
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10_000);
-      const res = await fetch(`https://api.telegram.org/bot${this.token}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          chat_id: chatId,
-          text,
-          parse_mode: 'HTML',
-          disable_web_page_preview: true,
-        }),
+      await withRetry(async () => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10_000);
+        const res = await fetch(`https://api.telegram.org/bot${this.token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            chat_id: chatId,
+            text,
+            parse_mode: 'HTML',
+            disable_web_page_preview: true,
+          }),
+        });
+        clearTimeout(timeout);
+        if (!res.ok) {
+          const body = await res.text();
+          throw new Error(`Telegram API ${res.status}: ${body}`);
+        }
       });
-      clearTimeout(timeout);
-
-      if (!res.ok) {
-        const body = await res.text();
-        this.logger.error(`Telegram send failed: ${res.status} ${body}`);
-        return;
-      }
 
       this.logger.log(`Telegram notification sent for lead #${lead.id}`);
     } catch (err) {
-      this.logger.error(`Telegram send error: ${(err as Error).message}`);
+      this.logger.error(`Telegram send failed after retries: ${(err as Error).message}`);
     }
   }
 

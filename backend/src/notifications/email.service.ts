@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import type { Lead } from '@prisma/client';
+import { withRetry } from './retry.util';
 
 /**
  * Sends email notifications via Resend HTTP API.
@@ -43,33 +44,33 @@ export class EmailService implements OnModuleInit {
     }
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10_000);
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        signal: controller.signal,
-        body: JSON.stringify({
-          from: process.env.MAIL_FROM ?? 'Jetsonic <onboarding@resend.dev>',
-          to,
-          subject: this.buildSubject(lead),
-          html: this.buildHtml(lead),
-        }),
+      await withRetry(async () => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10_000);
+        const res = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal,
+          body: JSON.stringify({
+            from: process.env.MAIL_FROM ?? 'Jetsonic <onboarding@resend.dev>',
+            to,
+            subject: this.buildSubject(lead),
+            html: this.buildHtml(lead),
+          }),
+        });
+        clearTimeout(timeout);
+        if (!res.ok) {
+          const body = await res.text();
+          throw new Error(`Resend API ${res.status}: ${body}`);
+        }
       });
-      clearTimeout(timeout);
-
-      if (!res.ok) {
-        const body = await res.text();
-        this.logger.error(`Resend error ${res.status}: ${body}`);
-        return;
-      }
 
       this.logger.log(`Email notification sent for lead #${lead.id}`);
     } catch (err) {
-      this.logger.error(`Email send error: ${(err as Error).message}`);
+      this.logger.error(`Email send failed after retries: ${(err as Error).message}`);
     }
   }
 

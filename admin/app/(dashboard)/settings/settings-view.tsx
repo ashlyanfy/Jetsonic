@@ -1,30 +1,23 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Bell, BellOff, Mail, Send, ShieldCheck, Smartphone, Check, AlertCircle } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Bell, BellOff, Send, ShieldCheck, Smartphone, Check, AlertCircle } from "lucide-react";
 import { api } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 import { disablePush, enablePush, getPushStatus, sendPushTest, type PushStatus } from "@/lib/push";
 import type { Role } from "@/lib/types";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 
-type Channel = "off" | "email" | "telegram" | "both";
-
-interface SettingsState {
-  channel: Channel;
-  emailTo: string;
+interface SettingsData {
   telegramChatId: string;
 }
 
-const STORAGE_KEY = "jetsonic_admin_notify_settings";
-const DEFAULT: SettingsState = { channel: "telegram", emailTo: "", telegramChatId: "" };
-
 export function SettingsView() {
   const { lang } = useLang();
-  const [state, setState] = useState<SettingsState>(DEFAULT);
+  const queryClient = useQueryClient();
+  const [telegramChatId, setTelegramChatId] = useState("");
   const [savedAt, setSavedAt] = useState<Date | null>(null);
 
   const [pushStatus, setPushStatus] = useState<PushStatus | "loading">("loading");
@@ -37,27 +30,30 @@ export function SettingsView() {
     staleTime: 5 * 60_000,
   });
 
+  // Fetch current settings from backend
+  const settingsQuery = useQuery({
+    queryKey: ["settings"],
+    queryFn: () => api<SettingsData>("/settings"),
+    enabled: me.data?.role === "ADMIN",
+  });
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      try {
-        setState({ ...DEFAULT, ...JSON.parse(raw) });
-      } catch {
-        /* ignore */
-      }
+    if (settingsQuery.data) {
+      setTelegramChatId(settingsQuery.data.telegramChatId ?? "");
     }
+  }, [settingsQuery.data]);
+
+  useEffect(() => {
     getPushStatus().then(setPushStatus).catch(() => setPushStatus("unsupported"));
   }, []);
 
   const save = useMutation({
-    mutationFn: async (next: SettingsState) => {
-      if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      return next;
-    },
+    mutationFn: (chatId: string) =>
+      api("/settings", { method: "PATCH", body: JSON.stringify({ telegramChatId: chatId }) }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
       setSavedAt(new Date());
-      setTimeout(() => setSavedAt(null), 2000);
+      setTimeout(() => setSavedAt(null), 2500);
     },
   });
 
@@ -66,78 +62,56 @@ export function SettingsView() {
       ? {
           eyebrow: "Настройки",
           title: "Уведомления",
-          subtitle: "Куда отправлять оповещения о новых заявках клиентов.",
+          subtitle: "Настройте куда приходят оповещения о новых заявках.",
           forbidden: "Только администратор может менять настройки.",
-          channel: "Куда присылать уведомления",
-          channelOff: "Не присылать",
-          channelEmail: "На почту",
-          channelTelegram: "В Telegram",
-          channelBoth: "Почта + Telegram",
-          emailLabel: "Адрес почты для уведомлений",
-          tgLabel: "ID чата в Telegram",
-          tgHint: "Это номер вашего чата с ботом. Как его узнать — пошагово ниже.",
+          tgTitle: "Telegram уведомления",
+          tgLabel: "ID чата Telegram",
+          tgPlaceholder: "Напишите ID чтобы приходили заявки",
+          tgHint: "Каждая новая заявка с сайта автоматически отправится в этот чат.",
           tgHelp:
-            "Шаг 1. Откройте Telegram на телефоне или в компьютере.\nШаг 2. В поиске наберите @jetsonic_trade_bot и откройте бот.\nШаг 3. Нажмите кнопку «Запустить» (Start) внизу.\nШаг 4. Отправьте боту любое сообщение, например «привет».\nШаг 5. Скопируйте сюда числовой ID (его подскажет администратор системы — он виден в логах сервера, либо запросите его у разработчика).",
-          save: "Сохранить настройки",
-          saved: "Сохранено",
-          note:
-            "Чтобы заявки начали приходить в Telegram автоматически, администратор системы должен прописать секретный токен бота и ID чата в настройках сервера. После этого ничего нажимать не нужно — оповещения будут приходить сами при каждой новой заявке.",
-          pushTitle: "Уведомления в браузере (push)",
-          pushSubtitle:
-            "Получайте короткое всплывающее уведомление о новой заявке прямо на этом устройстве — даже когда админка закрыта в фоне.",
-          pushEnable: "Включить уведомления",
+            "Как узнать ID чата:\n1. Откройте Telegram и найдите бот @userinfobot\n2. Отправьте ему любое сообщение\n3. Бот ответит вашим числовым ID — скопируйте его сюда\n\nДля группового чата: добавьте @userinfobot в группу, он пришлёт ID группы (начинается с -)",
+          save: "Сохранить",
+          saved: "✓ Сохранено",
+          saving: "Сохранение…",
+          pushTitle: "Push-уведомления в браузере",
+          pushSubtitle: "Всплывающее уведомление на этом устройстве при каждой новой заявке.",
+          pushEnable: "Включить",
           pushDisable: "Выключить",
-          pushTest: "Проверить — отправить тестовое",
-          pushStatusUnsupported: "Этот браузер не поддерживает push-уведомления. Попробуйте Chrome, Edge или Safari.",
-          pushStatusDisabledServer: "Push-уведомления пока не настроены на сервере. Обратитесь к администратору.",
-          pushStatusPermissionDenied:
-            "Вы заблокировали уведомления в настройках браузера. Откройте настройки сайта → разрешите уведомления → обновите страницу.",
+          pushTest: "Тест",
+          pushStatusUnsupported: "Браузер не поддерживает push. Используйте Chrome или Edge.",
+          pushStatusDisabledServer: "Push не настроен на сервере.",
+          pushStatusPermissionDenied: "Уведомления заблокированы в браузере. Разрешите в настройках сайта.",
           pushStatusNotSubscribed: "Уведомления не подключены.",
           pushStatusSubscribed: "Уведомления включены на этом устройстве.",
-          testSent: "Тест отправлен — проверьте уведомление.",
+          testSent: "Тест отправлен.",
           working: "Подождите…",
-          pushHowto:
-            "Что произойдёт: после нажатия «Включить» браузер один раз спросит разрешение — нажмите «Разрешить». Дальше при каждой новой заявке вы будете слышать короткий сигнал и видеть всплывающее окно. Клик по уведомлению откроет карточку заявки в админке.",
-          emailHowto:
-            "На указанную почту будут приходить письма с темой «Новая заявка #N» и всей информацией от клиента. Можно указать общий ящик команды (например manager@jetsonictrade.ae) или личный.",
         }
       : {
           eyebrow: "Settings",
           title: "Notifications",
-          subtitle: "Where to send alerts about new customer leads.",
+          subtitle: "Configure where new lead alerts are sent.",
           forbidden: "Only admins can change settings.",
-          channel: "Where to send alerts",
-          channelOff: "Off",
-          channelEmail: "Email",
-          channelTelegram: "Telegram",
-          channelBoth: "Email + Telegram",
-          emailLabel: "Email address for alerts",
+          tgTitle: "Telegram notifications",
           tgLabel: "Telegram chat ID",
-          tgHint: "The chat where the bot will send messages. Step-by-step below.",
+          tgPlaceholder: "Enter chat ID to receive leads",
+          tgHint: "Every new lead from the website will be sent to this chat automatically.",
           tgHelp:
-            "Step 1. Open Telegram on your phone or desktop.\nStep 2. Search @jetsonic_trade_bot and open the bot.\nStep 3. Press the Start button.\nStep 4. Send the bot any message (e.g. 'hi').\nStep 5. Paste the numeric chat ID here. The administrator can read it from the server logs.",
-          save: "Save settings",
-          saved: "Saved",
-          note:
-            "For Telegram delivery to actually work, the system administrator must add the bot token and chat ID to the server env. After that, every new lead is forwarded automatically.",
+            "How to find your chat ID:\n1. Open Telegram and find @userinfobot\n2. Send it any message\n3. It will reply with your numeric ID — paste it here\n\nFor a group chat: add @userinfobot to the group, it will send the group ID (starts with -)",
+          save: "Save",
+          saved: "✓ Saved",
+          saving: "Saving…",
           pushTitle: "Browser push notifications",
-          pushSubtitle:
-            "Get a small popup on this device whenever a new lead comes in — even when the admin panel is closed.",
-          pushEnable: "Enable notifications",
+          pushSubtitle: "A popup on this device whenever a new lead comes in.",
+          pushEnable: "Enable",
           pushDisable: "Disable",
-          pushTest: "Test — send a sample",
-          pushStatusUnsupported: "This browser does not support push. Try Chrome, Edge or Safari.",
-          pushStatusDisabledServer: "Push not configured on the server. Ask the administrator.",
-          pushStatusPermissionDenied:
-            "Notifications are blocked in browser settings. Open site settings → allow notifications → refresh.",
+          pushTest: "Test",
+          pushStatusUnsupported: "Browser does not support push. Use Chrome or Edge.",
+          pushStatusDisabledServer: "Push not configured on the server.",
+          pushStatusPermissionDenied: "Notifications blocked in browser settings. Allow in site settings.",
           pushStatusNotSubscribed: "Not subscribed.",
           pushStatusSubscribed: "Enabled on this device.",
-          testSent: "Test sent — check your notifications.",
+          testSent: "Test sent.",
           working: "Working…",
-          pushHowto:
-            "What happens: after you click Enable, the browser asks once for permission — click Allow. From then on, every new lead triggers a small popup with a sound. Click the popup to open the lead in the admin.",
-          emailHowto:
-            "The email will receive a message titled 'New lead #N' with all the client details. You can use a team inbox (e.g. manager@jetsonictrade.ae) or a personal one.",
         };
 
   if (me.data && me.data.role !== "ADMIN") {
@@ -153,7 +127,7 @@ export function SettingsView() {
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    save.mutate(state);
+    save.mutate(telegramChatId.trim());
   }
 
   async function handleEnablePush() {
@@ -194,27 +168,14 @@ export function SettingsView() {
 
   const pushStatusLabel = (() => {
     switch (pushStatus) {
-      case "unsupported":
-        return labels.pushStatusUnsupported;
-      case "disabled-server":
-        return labels.pushStatusDisabledServer;
-      case "permission-denied":
-        return labels.pushStatusPermissionDenied;
-      case "not-subscribed":
-        return labels.pushStatusNotSubscribed;
-      case "subscribed":
-        return labels.pushStatusSubscribed;
-      default:
-        return labels.working;
+      case "unsupported": return labels.pushStatusUnsupported;
+      case "disabled-server": return labels.pushStatusDisabledServer;
+      case "permission-denied": return labels.pushStatusPermissionDenied;
+      case "not-subscribed": return labels.pushStatusNotSubscribed;
+      case "subscribed": return labels.pushStatusSubscribed;
+      default: return labels.working;
     }
   })();
-
-  const channelOptions: Array<{ value: Channel; label: string; icon: typeof Mail }> = [
-    { value: "off", label: labels.channelOff, icon: Bell },
-    { value: "email", label: labels.channelEmail, icon: Mail },
-    { value: "telegram", label: labels.channelTelegram, icon: Send },
-    { value: "both", label: labels.channelBoth, icon: Bell },
-  ];
 
   return (
     <div className="mx-auto w-full max-w-[1100px] space-y-7 p-4 sm:p-6 lg:p-8">
@@ -224,6 +185,49 @@ export function SettingsView() {
         <p className="mt-2 max-w-xl text-sm text-slate-600">{labels.subtitle}</p>
       </header>
 
+      {/* Telegram Settings */}
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-5 rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/90 p-6 shadow-[0_18px_45px_rgba(6,44,73,0.06)]"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-500/15 text-accent-600">
+            <Send size={18} />
+          </div>
+          <h2 className="text-base font-black tracking-tight text-brand-700">{labels.tgTitle}</h2>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase tracking-wide text-brand-700">{labels.tgLabel}</label>
+          <Input
+            value={settingsQuery.isLoading ? "" : telegramChatId}
+            onChange={(e) => setTelegramChatId(e.target.value)}
+            placeholder={settingsQuery.isLoading ? "…" : labels.tgPlaceholder}
+            disabled={settingsQuery.isLoading}
+          />
+          <p className="text-xs text-brand-700/55">{labels.tgHint}</p>
+        </div>
+
+        <p className="whitespace-pre-line rounded-2xl border border-accent-500/20 bg-accent-500/5 px-3.5 py-3 text-xs leading-relaxed text-brand-700/80">
+          {labels.tgHelp}
+        </p>
+
+        <div className="flex items-center justify-between">
+          {savedAt && (
+            <span className="text-xs font-bold text-emerald-700">{labels.saved}</span>
+          )}
+          {save.isError && (
+            <span className="text-xs font-bold text-red-600">
+              {lang === "ru" ? "Ошибка сохранения" : "Save failed"}
+            </span>
+          )}
+          <Button type="submit" disabled={save.isPending || settingsQuery.isLoading} className="ml-auto">
+            {save.isPending ? labels.saving : labels.save}
+          </Button>
+        </div>
+      </form>
+
+      {/* Push notifications */}
       <section className="rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/90 p-6 shadow-[0_18px_45px_rgba(6,44,73,0.06)]">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-500/15 text-accent-600">
@@ -266,95 +270,13 @@ export function SettingsView() {
             )}
           </div>
         </div>
+
         {pushMessage && (
           <p className="mt-3 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200">
             {pushMessage}
           </p>
         )}
-
-        <p className="mt-3 rounded-2xl border border-accent-500/20 bg-accent-500/5 px-3.5 py-3 text-xs leading-relaxed text-brand-700/80">
-          {labels.pushHowto}
-        </p>
       </section>
-
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/90 p-6 shadow-[0_18px_45px_rgba(6,44,73,0.06)]"
-      >
-        <div>
-          <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-700/60">{labels.channel}</h2>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {channelOptions.map((opt) => {
-              const Icon = opt.icon;
-              const active = state.channel === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setState({ ...state, channel: opt.value })}
-                  className={cn(
-                    "flex h-14 items-center gap-3 rounded-2xl border px-4 text-sm font-bold transition",
-                    active
-                      ? "border-accent-500 bg-accent-500/10 text-brand-700 shadow-[0_10px_24px_rgba(46,185,200,0.18)]"
-                      : "border-[rgba(6,44,73,0.10)] bg-white text-brand-700/70 hover:border-brand-700/30 hover:bg-brand-50",
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-xl",
-                      active ? "bg-accent-500 text-white" : "bg-brand-50 text-brand-700",
-                    )}
-                  >
-                    <Icon size={16} />
-                  </div>
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {(state.channel === "email" || state.channel === "both") && (
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wide text-brand-700">{labels.emailLabel}</label>
-            <Input
-              type="email"
-              value={state.emailTo}
-              onChange={(e) => setState({ ...state, emailTo: e.target.value })}
-              placeholder="manager@jetsonictrade.ae"
-            />
-            <p className="rounded-2xl border border-accent-500/20 bg-accent-500/5 px-3.5 py-3 text-xs leading-relaxed text-brand-700/80">
-              {labels.emailHowto}
-            </p>
-          </div>
-        )}
-
-        {(state.channel === "telegram" || state.channel === "both") && (
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wide text-brand-700">{labels.tgLabel}</label>
-            <Input
-              value={state.telegramChatId}
-              onChange={(e) => setState({ ...state, telegramChatId: e.target.value })}
-              placeholder="123456789"
-            />
-            <p className="text-xs text-brand-700/55">{labels.tgHint}</p>
-            <p className="whitespace-pre-line rounded-2xl border border-accent-500/20 bg-accent-500/5 px-3.5 py-3 text-xs leading-relaxed text-brand-700/80">
-              {labels.tgHelp}
-            </p>
-          </div>
-        )}
-
-        <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
-          {labels.note}
-        </p>
-
-        <div className="flex items-center justify-between">
-          {savedAt && <span className="text-xs font-bold text-emerald-700">✓ {labels.saved}</span>}
-          <Button type="submit" disabled={save.isPending} className="ml-auto">
-            {labels.save}
-          </Button>
-        </div>
-      </form>
     </div>
   );
 }

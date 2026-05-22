@@ -20,7 +20,7 @@ export class PushService implements OnModuleInit {
   onModuleInit() {
     const publicKey = process.env.VAPID_PUBLIC_KEY;
     const privateKey = process.env.VAPID_PRIVATE_KEY;
-    const subject = process.env.VAPID_SUBJECT ?? 'mailto:admin@jetsonictrade.ae';
+    const subject = process.env.VAPID_SUBJECT ?? 'mailto:sales@jetsonic.aero';
 
     if (!publicKey || !privateKey) {
       this.logger.warn('VAPID keys not set — push notifications disabled');

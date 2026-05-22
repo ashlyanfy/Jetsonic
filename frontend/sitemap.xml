@@ -1,38 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
   <url>
     <loc>https://jetsonic.aero/</loc>
-    <priority>1.0</priority>
+    <lastmod>2026-05-22</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jetsonic.aero/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://jetsonic.aero/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jetsonic.aero/"/>
   </url>
-  <url>
-    <loc>https://jetsonic.aero/about/</loc>
-    <priority>0.7</priority>
-    <changefreq>monthly</changefreq>
-  </url>
+
   <url>
     <loc>https://jetsonic.aero/aog/</loc>
-    <priority>0.9</priority>
+    <lastmod>2026-05-22</lastmod>
     <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jetsonic.aero/aog/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://jetsonic.aero/aog/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jetsonic.aero/aog/"/>
   </url>
+
   <url>
     <loc>https://jetsonic.aero/parts/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.9</priority>
-    <changefreq>monthly</changefreq>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jetsonic.aero/parts/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://jetsonic.aero/parts/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jetsonic.aero/parts/"/>
   </url>
-  <url>
-    <loc>https://jetsonic.aero/services/</loc>
-    <priority>0.8</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://jetsonic.aero/quality/</loc>
-    <priority>0.7</priority>
-    <changefreq>monthly</changefreq>
-  </url>
+
   <url>
     <loc>https://jetsonic.aero/contact/</loc>
-    <priority>0.9</priority>
+    <lastmod>2026-05-22</lastmod>
     <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jetsonic.aero/contact/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://jetsonic.aero/contact/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jetsonic.aero/contact/"/>
   </url>
+
+  <url>
+    <loc>https://jetsonic.aero/services/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jetsonic.aero/services/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://jetsonic.aero/services/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jetsonic.aero/services/"/>
+  </url>
+
+  <url>
+    <loc>https://jetsonic.aero/quality/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jetsonic.aero/quality/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://jetsonic.aero/quality/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jetsonic.aero/quality/"/>
+  </url>
+
+  <url>
+    <loc>https://jetsonic.aero/about/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jetsonic.aero/about/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://jetsonic.aero/about/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jetsonic.aero/about/"/>
+  </url>
+
 </urlset>

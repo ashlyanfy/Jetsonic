@@ -48,9 +48,12 @@ export class TelegramService implements OnModuleInit {
     const text = this.formatLead(lead);
 
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10_000);
       const res = await fetch(`https://api.telegram.org/bot${this.token}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           chat_id: this.chatId,
           text,
@@ -58,6 +61,7 @@ export class TelegramService implements OnModuleInit {
           disable_web_page_preview: true,
         }),
       });
+      clearTimeout(timeout);
 
       if (!res.ok) {
         const body = await res.text();

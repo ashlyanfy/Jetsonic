@@ -108,6 +108,7 @@
     target_date: 'targetDate',
     delivery_location: 'deliveryLocation',
     message: 'message',
+    'bot-field': 'botField', // honeypot — must stay empty; filled = bot
   };
 
   function initRfqForm(){
@@ -144,8 +145,13 @@
 
         window.location.href = '/thank-you.html';
       } catch (err) {
-        console.error('Lead submit failed, falling back to native submit:', err);
-        form.submit();
+        console.error('Lead submit failed:', err);
+        // Show error to user — do NOT fall back to native submit (would silently drop the lead)
+        const lang = document.documentElement.lang || 'en';
+        const msg = lang === 'ar'
+          ? 'حدث خطأ في الإرسال. يرجى إعادة المحاولة أو مراسلتنا على sales@jetsonic.aero'
+          : 'Submission failed. Please try again or email us at sales@jetsonic.aero';
+        alert(msg);
       } finally {
         if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = original; }
       }

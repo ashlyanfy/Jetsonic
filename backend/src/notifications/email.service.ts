@@ -43,12 +43,15 @@ export class EmailService implements OnModuleInit {
     }
 
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10_000);
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
           'Content-Type': 'application/json',
         },
+        signal: controller.signal,
         body: JSON.stringify({
           from: process.env.MAIL_FROM ?? 'Jetsonic <onboarding@resend.dev>',
           to,
@@ -56,6 +59,7 @@ export class EmailService implements OnModuleInit {
           html: this.buildHtml(lead),
         }),
       });
+      clearTimeout(timeout);
 
       if (!res.ok) {
         const body = await res.text();

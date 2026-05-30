@@ -3,6 +3,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../notifications/email.service';
 
 // Mock bcrypt at module level — native bindings can't be spied on directly
 jest.mock('bcrypt', () => ({
@@ -40,6 +41,10 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useValue: { signAsync: jest.fn().mockResolvedValue('jwt-token') },
+        },
+        {
+          provide: EmailService,
+          useValue: { sendPasswordReset: jest.fn().mockResolvedValue(undefined) },
         },
       ],
     }).compile();

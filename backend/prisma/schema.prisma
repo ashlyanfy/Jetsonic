@@ -26,10 +26,21 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  notes             LeadNote[]
-  audits            AuditLog[]
-  assignedLeads     Lead[]             @relation("AssignedLeads")
-  pushSubscriptions PushSubscription[]
+  notes               LeadNote[]
+  audits              AuditLog[]
+  assignedLeads       Lead[]               @relation("AssignedLeads")
+  pushSubscriptions   PushSubscription[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PushSubscription {

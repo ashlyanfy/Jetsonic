@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, useRef, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, BellOff, Send, ShieldCheck, Smartphone, Check, AlertCircle } from "lucide-react";
+import { Bell, BellOff, Send, ShieldCheck, Smartphone, Check, AlertCircle, KeyRound } from "lucide-react";
 import { api } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { disablePush, enablePush, getPushStatus, sendPushTest, type PushStatus } from "@/lib/push";
@@ -19,6 +19,14 @@ export function SettingsView() {
   const queryClient = useQueryClient();
   const [telegramChatId, setTelegramChatId] = useState("");
   const [savedAt, setSavedAt] = useState<Date | null>(null);
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pwError, setPwError] = useState<string | null>(null);
+  const [pwSuccess, setPwSuccess] = useState(false);
+  const pwSuccessTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [pushStatus, setPushStatus] = useState<PushStatus | "loading">("loading");
   const [pushBusy, setPushBusy] = useState(false);
@@ -56,6 +64,38 @@ export function SettingsView() {
       setTimeout(() => setSavedAt(null), 2500);
     },
   });
+
+  const changePw = useMutation({
+    mutationFn: (body: { currentPassword: string; newPassword: string }) =>
+      api("/auth/password", { method: "PATCH", body: JSON.stringify(body) }),
+    onSuccess: () => {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPwError(null);
+      setPwSuccess(true);
+      if (pwSuccessTimer.current) clearTimeout(pwSuccessTimer.current);
+      pwSuccessTimer.current = setTimeout(() => setPwSuccess(false), 3000);
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      setPwError(msg || (lang === "ru" ? "Ошибка смены пароля" : "Failed to change password"));
+    },
+  });
+
+  function handlePasswordSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setPwError(null);
+    if (newPassword !== confirmPassword) {
+      setPwError(lang === "ru" ? "Новые пароли не совпадают" : "New passwords do not match");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPwError(lang === "ru" ? "Минимум 8 символов" : "Minimum 8 characters");
+      return;
+    }
+    changePw.mutate({ currentPassword, newPassword });
+  }
 
   const labels =
     lang === "ru"
@@ -114,16 +154,7 @@ export function SettingsView() {
           working: "Working…",
         };
 
-  if (me.data && me.data.role !== "ADMIN") {
-    return (
-      <div className="mx-auto w-full max-w-[1100px] p-4 sm:p-6 lg:p-8">
-        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center">
-          <ShieldCheck size={28} className="mx-auto text-amber-700" />
-          <p className="mt-3 text-base font-bold text-amber-900">{labels.forbidden}</p>
-        </div>
-      </div>
-    );
-  }
+  const isAdmin = me.data?.role === "ADMIN";
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -185,98 +216,188 @@ export function SettingsView() {
         <p className="mt-2 max-w-xl text-sm text-slate-600">{labels.subtitle}</p>
       </header>
 
-      {/* Telegram Settings */}
+      {/* Telegram & Push — ADMIN only */}
+      {isAdmin ? (
+        <>
+          {/* Telegram Settings */}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5 rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/90 p-6 shadow-[0_18px_45px_rgba(6,44,73,0.06)]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-500/15 text-accent-600">
+                <Send size={18} />
+              </div>
+              <h2 className="text-base font-black tracking-tight text-brand-700">{labels.tgTitle}</h2>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wide text-brand-700">{labels.tgLabel}</label>
+              <Input
+                value={settingsQuery.isLoading ? "" : telegramChatId}
+                onChange={(e) => setTelegramChatId(e.target.value)}
+                placeholder={settingsQuery.isLoading ? "…" : labels.tgPlaceholder}
+                disabled={settingsQuery.isLoading}
+              />
+              <p className="text-xs text-brand-700/55">{labels.tgHint}</p>
+            </div>
+
+            <p className="whitespace-pre-line rounded-2xl border border-accent-500/20 bg-accent-500/5 px-3.5 py-3 text-xs leading-relaxed text-brand-700/80">
+              {labels.tgHelp}
+            </p>
+
+            <div className="flex items-center justify-between">
+              {savedAt && (
+                <span className="text-xs font-bold text-emerald-700">{labels.saved}</span>
+              )}
+              {save.isError && (
+                <span className="text-xs font-bold text-red-600">
+                  {lang === "ru" ? "Ошибка сохранения" : "Save failed"}
+                </span>
+              )}
+              <Button type="submit" disabled={save.isPending || settingsQuery.isLoading} className="ml-auto">
+                {save.isPending ? labels.saving : labels.save}
+              </Button>
+            </div>
+          </form>
+
+          {/* Push notifications */}
+          <section className="rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/90 p-6 shadow-[0_18px_45px_rgba(6,44,73,0.06)]">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-500/15 text-accent-600">
+                <Smartphone size={18} />
+              </div>
+              <div>
+                <h2 className="text-base font-black tracking-tight text-brand-700">{labels.pushTitle}</h2>
+                <p className="text-xs text-brand-700/60">{labels.pushSubtitle}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(6,44,73,0.08)] bg-brand-50/30 p-4">
+              <div className="flex items-center gap-2 text-sm font-bold text-brand-700">
+                {pushStatus === "subscribed" ? (
+                  <Check size={16} className="text-emerald-600" />
+                ) : pushStatus === "unsupported" || pushStatus === "disabled-server" || pushStatus === "permission-denied" ? (
+                  <AlertCircle size={16} className="text-amber-600" />
+                ) : (
+                  <BellOff size={16} className="text-brand-700/50" />
+                )}
+                {pushStatusLabel}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {pushStatus === "not-subscribed" && (
+                  <Button onClick={handleEnablePush} disabled={pushBusy} variant="accent">
+                    <Bell size={14} />
+                    {pushBusy ? labels.working : labels.pushEnable}
+                  </Button>
+                )}
+                {pushStatus === "subscribed" && (
+                  <>
+                    <Button onClick={handleTestPush} disabled={pushBusy} variant="secondary" size="sm">
+                      {labels.pushTest}
+                    </Button>
+                    <Button onClick={handleDisablePush} disabled={pushBusy} variant="ghost" size="sm">
+                      <BellOff size={14} />
+                      {labels.pushDisable}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {pushMessage && (
+              <p className="mt-3 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200">
+                {pushMessage}
+              </p>
+            )}
+          </section>
+        </>
+      ) : (
+        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6">
+          <div className="flex items-center gap-3">
+            <ShieldCheck size={20} className="shrink-0 text-amber-700" />
+            <p className="text-sm font-bold text-amber-900">{labels.forbidden}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Password change — available to ALL users */}
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handlePasswordSubmit}
         className="space-y-5 rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/90 p-6 shadow-[0_18px_45px_rgba(6,44,73,0.06)]"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-500/15 text-accent-600">
-            <Send size={18} />
+            <KeyRound size={18} />
           </div>
-          <h2 className="text-base font-black tracking-tight text-brand-700">{labels.tgTitle}</h2>
+          <h2 className="text-base font-black tracking-tight text-brand-700">
+            {lang === "ru" ? "Смена пароля" : "Change password"}
+          </h2>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase tracking-wide text-brand-700">{labels.tgLabel}</label>
-          <Input
-            value={settingsQuery.isLoading ? "" : telegramChatId}
-            onChange={(e) => setTelegramChatId(e.target.value)}
-            placeholder={settingsQuery.isLoading ? "…" : labels.tgPlaceholder}
-            disabled={settingsQuery.isLoading}
-          />
-          <p className="text-xs text-brand-700/55">{labels.tgHint}</p>
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wide text-brand-700">
+              {lang === "ru" ? "Текущий пароль" : "Current password"}
+            </label>
+            <Input
+              type="password"
+              autoComplete="current-password"
+              required
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wide text-brand-700">
+              {lang === "ru" ? "Новый пароль" : "New password"}
+            </label>
+            <Input
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={8}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wide text-brand-700">
+              {lang === "ru" ? "Повторите новый пароль" : "Confirm new password"}
+            </label>
+            <Input
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={8}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </div>
         </div>
 
-        <p className="whitespace-pre-line rounded-2xl border border-accent-500/20 bg-accent-500/5 px-3.5 py-3 text-xs leading-relaxed text-brand-700/80">
-          {labels.tgHelp}
-        </p>
+        {pwError && (
+          <p className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">
+            {pwError}
+          </p>
+        )}
 
         <div className="flex items-center justify-between">
-          {savedAt && (
-            <span className="text-xs font-bold text-emerald-700">{labels.saved}</span>
-          )}
-          {save.isError && (
-            <span className="text-xs font-bold text-red-600">
-              {lang === "ru" ? "Ошибка сохранения" : "Save failed"}
+          {pwSuccess && (
+            <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-700">
+              <Check size={14} />
+              {lang === "ru" ? "Пароль изменён" : "Password changed"}
             </span>
           )}
-          <Button type="submit" disabled={save.isPending || settingsQuery.isLoading} className="ml-auto">
-            {save.isPending ? labels.saving : labels.save}
+          <Button type="submit" disabled={changePw.isPending} className="ml-auto">
+            {changePw.isPending
+              ? (lang === "ru" ? "Сохранение…" : "Saving…")
+              : (lang === "ru" ? "Сменить пароль" : "Change password")}
           </Button>
         </div>
       </form>
-
-      {/* Push notifications */}
-      <section className="rounded-3xl border border-[rgba(6,44,73,0.08)] bg-white/90 p-6 shadow-[0_18px_45px_rgba(6,44,73,0.06)]">
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-500/15 text-accent-600">
-            <Smartphone size={18} />
-          </div>
-          <div>
-            <h2 className="text-base font-black tracking-tight text-brand-700">{labels.pushTitle}</h2>
-            <p className="text-xs text-brand-700/60">{labels.pushSubtitle}</p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(6,44,73,0.08)] bg-brand-50/30 p-4">
-          <div className="flex items-center gap-2 text-sm font-bold text-brand-700">
-            {pushStatus === "subscribed" ? (
-              <Check size={16} className="text-emerald-600" />
-            ) : pushStatus === "unsupported" || pushStatus === "disabled-server" || pushStatus === "permission-denied" ? (
-              <AlertCircle size={16} className="text-amber-600" />
-            ) : (
-              <BellOff size={16} className="text-brand-700/50" />
-            )}
-            {pushStatusLabel}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {pushStatus === "not-subscribed" && (
-              <Button onClick={handleEnablePush} disabled={pushBusy} variant="accent">
-                <Bell size={14} />
-                {pushBusy ? labels.working : labels.pushEnable}
-              </Button>
-            )}
-            {pushStatus === "subscribed" && (
-              <>
-                <Button onClick={handleTestPush} disabled={pushBusy} variant="secondary" size="sm">
-                  {labels.pushTest}
-                </Button>
-                <Button onClick={handleDisablePush} disabled={pushBusy} variant="ghost" size="sm">
-                  <BellOff size={14} />
-                  {labels.pushDisable}
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {pushMessage && (
-          <p className="mt-3 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200">
-            {pushMessage}
-          </p>
-        )}
-      </section>
     </div>
   );
 }

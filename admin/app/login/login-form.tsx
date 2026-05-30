@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, ApiError, setToken } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
@@ -109,6 +110,15 @@ export function LoginForm() {
           <Button type="submit" disabled={loading} size="lg" className="w-full">
             {loading ? t("signingIn") : t("signIn")}
           </Button>
+
+          <div className="text-center">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-accent-600 hover:underline"
+            >
+              {lang === "ru" ? "Забыли пароль?" : "Forgot password?"}
+            </Link>
+          </div>
         </form>
       </div>
 

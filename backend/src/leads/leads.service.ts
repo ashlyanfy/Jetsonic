@@ -190,7 +190,7 @@ export class LeadsService {
         { partNumber: { contains: q, mode: 'insensitive' } },
       ];
     }
-    return this.prisma.lead.findMany({ where, orderBy: { createdAt: 'desc' } });
+    return this.prisma.lead.findMany({ where, orderBy: { createdAt: 'desc' }, take: 5_000 });
   }
 
   async stats() {

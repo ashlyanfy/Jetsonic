@@ -74,6 +74,75 @@ export class EmailService implements OnModuleInit {
     }
   }
 
+  async sendPasswordReset(toEmail: string, name: string, resetUrl: string): Promise<void> {
+    if (!this.isConfigured()) {
+      this.logger.warn(`Password reset email skipped (not configured) — url: ${resetUrl}`);
+      return;
+    }
+    try {
+      await withRetry(async () => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10_000);
+        const res = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal,
+          body: JSON.stringify({
+            from: process.env.MAIL_FROM ?? 'Jetsonic <onboarding@resend.dev>',
+            to: [toEmail],
+            subject: 'Jetsonic — Password Reset',
+            html: this.buildPasswordResetHtml(name, resetUrl),
+          }),
+        });
+        clearTimeout(timeout);
+        if (!res.ok) {
+          const body = await res.text();
+          throw new Error(`Resend API ${res.status}: ${body}`);
+        }
+      });
+      this.logger.log(`Password reset email sent to ${toEmail}`);
+    } catch (err) {
+      this.logger.error(`Password reset email failed: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  private buildPasswordResetHtml(name: string, resetUrl: string): string {
+    const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif">
+  <div style="max-width:520px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)">
+    <div style="background:#0f172a;padding:24px 32px">
+      <div style="font-size:20px;font-weight:700;color:#fff">✈️ Jetsonic</div>
+      <div style="font-size:13px;color:#94a3b8;margin-top:4px">Password Reset</div>
+    </div>
+    <div style="padding:32px">
+      <p style="margin:0 0 16px;font-size:15px;color:#111827">Hi ${esc(name)},</p>
+      <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.6">
+        We received a request to reset your password. Click the button below to set a new one.
+        This link is valid for <strong>15 minutes</strong>.
+      </p>
+      <a href="${esc(resetUrl)}"
+         style="display:inline-block;padding:12px 28px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:600">
+        Reset password →
+      </a>
+      <p style="margin:24px 0 0;font-size:13px;color:#6b7280">
+        If you did not request this, ignore this email. Your password will remain unchanged.
+      </p>
+    </div>
+    <div style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:12px;color:#94a3b8">
+      Jetsonic Trading FZCO · jetsonic.aero
+    </div>
+  </div>
+</body>
+</html>`;
+  }
+
   private buildSubject(lead: Lead): string {
     const urgency =
       lead.urgency === 'AOG' ? '🚨 AOG' :

@@ -78,7 +78,9 @@
 
   // API endpoint for RFQ submissions.
   // Priority: <meta name="jetsonic-api"> → <meta name="cms-api"> → localhost fallback → PROD_API_BASE.
-  const PROD_API_BASE = 'https://jetsonic-backend.up.railway.app/api/v1';
+  // In production the backend is reverse-proxied under the same origin at /api/*,
+  // so a relative base works for both the sslip.io test host and the real domain.
+  const PROD_API_BASE = '/api/v1';
   const API_BASE = (() => {
     const explicit = document.querySelector('meta[name="jetsonic-api"]');
     if (explicit && explicit.content) return explicit.content.replace(/\/+$/, '');

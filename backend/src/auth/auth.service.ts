@@ -49,9 +49,8 @@ export class AuthService {
   }
 
   async requestPasswordReset(email: string): Promise<void> {
-    // Always respond with success to prevent user enumeration.
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) return;
+    if (!user) throw new BadRequestException('No account with this email address exists');
 
     // Invalidate any existing tokens for this user.
     await this.prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });

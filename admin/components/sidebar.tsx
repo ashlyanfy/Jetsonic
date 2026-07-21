@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Inbox, LayoutGrid, Search, LogOut, X, Users as UsersIcon, LayoutDashboard, Settings as SettingsIcon } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { api, clearToken } from "@/lib/api";
@@ -20,6 +20,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
   const { t, lang } = useLang();
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const cmsLabel = lang === "ru" ? "Контент сайта" : "Site content";
   const seoLabel = "SEO";
@@ -50,6 +51,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
 
   function handleLogout() {
     clearToken();
+    queryClient.clear();
     router.push("/login");
     router.refresh();
   }

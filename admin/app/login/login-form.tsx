@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { api, ApiError, setToken } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/lang-toggle";
@@ -17,6 +18,7 @@ interface LoginResponse {
 export function LoginForm() {
   const { t, lang } = useLang();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,6 +35,7 @@ export function LoginForm() {
         body: JSON.stringify({ email, password }),
       });
       setToken(res.accessToken);
+      queryClient.clear();
       router.push("/leads");
       router.refresh();
     } catch (err) {

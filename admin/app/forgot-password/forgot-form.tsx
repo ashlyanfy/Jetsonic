@@ -22,8 +22,13 @@ export function ForgotPasswordForm() {
         body: JSON.stringify({ email }),
       });
       setSent(true);
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.toLowerCase().includes("no account") || msg.toLowerCase().includes("exist")) {
+        setError(`No account with the email "${email}" exists.`);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

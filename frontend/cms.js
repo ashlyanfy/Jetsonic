@@ -15,8 +15,8 @@
   var API_BASE = (function () {
     var meta = document.querySelector('meta[name="cms-api"]');
     if (meta && meta.content) return meta.content.replace(/\/$/, '');
-    // Default — Railway backend
-    return 'https://jetsonic-backend.up.railway.app/api/v1';
+    // Default — backend is reverse-proxied same-origin under /api/* in production.
+    return '/api/v1';
   })();
 
   function findTargets() {

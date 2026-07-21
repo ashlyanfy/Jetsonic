@@ -1,0 +1,105 @@
+# ---------------------------------------------------------------------------
+# Production stack for the Jetsonic *landing* (jetsonic.aero) on the shared
+# Hetzner box. This project is a TENANT of the existing Jetsonic marketplace
+# deployment: it does NOT publish ports 80/443. The marketplace's Caddy
+# (project "jetsonic", network jetsonic_default) terminates TLS and reverse-
+# proxies to the containers below by their container_name.
+#
+# Usage (on the server, from /opt/jetsonic-landing):
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Requires a .env next to this file (see deploy/env.prod.template).
+# ---------------------------------------------------------------------------
+name: jetsonic-landing
+
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: landing-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-jetsonic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-jetsonic}
+    volumes:
+      # postgres:18 keeps PGDATA in a subdirectory of /var/lib/postgresql —
+      # mount the volume one level up, per the official image docs.
+      - landing_pgdata:/var/lib/postgresql
+    networks:
+      - internal
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jetsonic} -d ${POSTGRES_DB:-jetsonic}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+    container_name: landing-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - internal
+      - shared
+    mem_limit: 320m
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # Any HTTP response (incl. 404 for the bare prefix) means the app is up.
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/api/v1',r=>process.exit(0)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  admin:
+    build:
+      context: ./admin
+      # No NEXT_PUBLIC_API_BASE arg on purpose: the admin resolves the API as
+      # same-origin `/api/v1` at runtime (see admin/lib/config.ts), so one
+      # image works on both the sslip.io test host and the real domain.
+    container_name: landing-admin
+    restart: unless-stopped
+    networks:
+      - shared
+    mem_limit: 256m
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/login',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  site:
+    build:
+      context: ./frontend
+      args:
+        BUILD_ID: ${BUILD_ID:-prod}
+    container_name: landing-site
+    restart: unless-stopped
+    networks:
+      - shared
+    mem_limit: 32m
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  # Private network for landing-only traffic (api <-> db).
+  internal:
+    driver: bridge
+  # The marketplace Caddy lives here; joining it lets Caddy reach our
+  # containers by name. Created by the "jetsonic" compose project.
+  shared:
+    external: true
+    name: jetsonic_default
+
+volumes:
+  landing_pgdata:

@@ -148,6 +148,11 @@
 
   var fired = Object.create(null);
 
+  // Поднимается, когда форму отправил бот (заполнена ловушка). Обёртка над
+  // fetch про ловушку не знает, а без этого флага боты, долбящие упавший
+  // эндпоинт, надули бы `rfq_error` и сломали сравнение попыток с заявками.
+  var lastSubmitWasBot = false;
+
   /**
    * track('event_name', {параметры}, {once: 'ключ'})
    * Ключ `once` гарантирует одну отправку на загрузку страницы.
@@ -244,6 +249,16 @@
 
   /* ----------------------------------------------------- клики по ссылкам */
 
+  // Подписи на сайте переводятся, поэтому в отчёт идёт канонический
+  // английский вариант из data-en. Иначе одна и та же кнопка, нажатая в
+  // арабской версии, встала бы в отчёте отдельной строкой.
+  function labelOf(el) {
+    if (el.dataset && el.dataset.en) return clean(el.dataset.en, 100);
+    var translated = el.querySelector('[data-en]');
+    if (translated && translated.dataset.en) return clean(translated.dataset.en, 100);
+    return clean(el.textContent, 100) || clean(el.getAttribute('aria-label'), 100) || 'no_text';
+  }
+
   function placementOf(el) {
     if (el.closest('.mobile-bottom-nav')) return 'mobile_nav';
     if (el.closest('.desktop-nav')) return 'header_nav';
@@ -267,7 +282,7 @@
 
       var href = link.getAttribute('href') || '';
       var placement = placementOf(link);
-      var label = clean(link.textContent, 100) || clean(link.getAttribute('aria-label'), 100) || 'no_text';
+      var label = labelOf(link);
 
       if (/^https?:\/\/(wa\.me|(api|web|chat)\.whatsapp\.com)/i.test(href)) {
         track('whatsapp_click', {
@@ -379,7 +394,8 @@
     }
 
     form.addEventListener('submit', function () {
-      if (honeypotFilled()) return; // бот — молчим
+      lastSubmitWasBot = honeypotFilled();
+      if (lastSubmitWasBot) return; // бот — молчим
       submitted = true;
 
       var data = new FormData(form);
@@ -430,7 +446,7 @@
       if (!isLead) return promise;
 
       return promise.then(function (response) {
-        if (!response.ok) {
+        if (!response.ok && !lastSubmitWasBot) {
           track('rfq_error', { error_type: 'api_status', error_status: response.status });
           // Заявку не приняли — снимаем заготовку, иначе на /thank-you.html
           // родился бы лид, которого не было.
@@ -438,11 +454,13 @@
         }
         return response;
       }, function (error) {
-        track('rfq_error', {
-          error_type: 'network',
-          error_status: 0,
-          error_message: clean(error && error.message, 100) || 'unknown'
-        });
+        if (!lastSubmitWasBot) {
+          track('rfq_error', {
+            error_type: 'network',
+            error_status: 0,
+            error_message: clean(error && error.message, 100) || 'unknown'
+          });
+        }
         dropStore('sessionStorage', SS_LEAD);
         throw error;
       });

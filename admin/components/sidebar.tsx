@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Inbox, LayoutGrid, Search, LogOut, X, Users as UsersIcon, LayoutDashboard, Settings as SettingsIcon } from "lucide-react";
+import { BarChart3, Inbox, LayoutGrid, Search, LogOut, X, Users as UsersIcon, LayoutDashboard, Settings as SettingsIcon } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { api, clearToken } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -34,10 +34,12 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
   const isAdmin = me.data?.role === "ADMIN";
 
   const dashboardLabel = lang === "ru" ? "Главная" : "Dashboard";
+  const analyticsLabel = lang === "ru" ? "Аналитика" : "Analytics";
   const settingsLabel = lang === "ru" ? "Настройки" : "Settings";
 
   const nav = [
     { href: "/main", label: dashboardLabel, icon: LayoutDashboard },
+    { href: "/analytics", label: analyticsLabel, icon: BarChart3 },
     { href: "/leads", label: t("navLeads"), icon: Inbox },
     ...(isAdmin
       ? [

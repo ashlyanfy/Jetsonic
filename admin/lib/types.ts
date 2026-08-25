@@ -77,3 +77,63 @@ export interface LeadFilters {
   page?: number;
   pageSize?: number;
 }
+
+// ---------- Site analytics (first-party visitor actions) ----------
+
+export type SiteEventType =
+  | "PAGE_VIEW"
+  | "WHATSAPP"
+  | "CALL"
+  | "EMAIL"
+  | "FORM_START"
+  | "RFQ_SUBMIT";
+
+export interface SiteEvent {
+  id: number;
+  type: SiteEventType;
+  page: string | null;
+  visitorId: string;
+  createdAt: string;
+}
+
+export interface SiteEventListResponse {
+  items: SiteEvent[];
+  total: number;
+  page: number;
+  pageSize: number;
+  pages: number;
+}
+
+export interface SiteEventStats {
+  pageViews: number;
+  whatsapp: number;
+  call: number;
+  email: number;
+  formStart: number;
+  rfqSubmit: number;
+  uniqueVisitors: number;
+  actions: number;
+  total: number;
+}
+
+export interface SiteEventDailyPoint {
+  date: string;
+  views: number;
+  actions: number;
+  visitors: number;
+}
+
+export interface SiteEventPageRow {
+  page: string;
+  pageViews: number;
+  whatsapp: number;
+  call: number;
+  email: number;
+  formStart: number;
+  rfqSubmit: number;
+  total: number;
+}
+
+export interface SiteEventPageBreakdown {
+  items: SiteEventPageRow[];
+}

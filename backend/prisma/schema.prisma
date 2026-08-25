@@ -114,6 +114,32 @@ model LeadNote {
   author User @relation(fields: [authorId], references: [id])
 }
 
+// ---------- Site analytics (first-party visitor actions) ----------
+
+enum SiteEventType {
+  PAGE_VIEW // открытие страницы
+  WHATSAPP // клик по кнопке WhatsApp
+  CALL // клик по телефону
+  EMAIL // клик по почте
+  FORM_START // первое касание формы RFQ
+  RFQ_SUBMIT // заявка принята сервером
+}
+
+model SiteEvent {
+  id        Int           @id @default(autoincrement())
+  type      SiteEventType
+  page      String?
+  visitorId String
+  ip        String?
+  userAgent String?
+  createdAt DateTime      @default(now())
+
+  @@index([createdAt])
+  @@index([type, createdAt])
+  @@index([visitorId])
+  @@index([page])
+}
+
 // ---------- CMS ----------
 
 model Page {

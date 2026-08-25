@@ -10,9 +10,13 @@ import type { LeadListResponse } from "@/lib/types";
 import { StatsBar } from "@/components/stats-bar";
 import { LeadsChart } from "@/components/leads-chart";
 import { StatusBadge, UrgencyBadge } from "@/components/status-badge";
+import { ActivityChart } from "@/components/analytics/activity-chart";
+import { MonitoringPanel } from "@/components/analytics/monitoring-panel";
+import { PeriodPicker, usePeriod } from "@/components/analytics/period";
 
 export function MainView() {
   const { lang, t } = useLang();
+  const [period, setPeriod] = usePeriod();
 
   const recent = useQuery({
     queryKey: ["leads", { page: 1, pageSize: 10 }],
@@ -29,6 +33,7 @@ export function MainView() {
           recent: "Последние заявки",
           viewAll: "Все заявки",
           empty: "Заявок пока нет.",
+          monitoring: "Действия посетителей",
         }
       : {
           eyebrow: "Manager workspace",
@@ -37,6 +42,7 @@ export function MainView() {
           recent: "Recent leads",
           viewAll: "All leads",
           empty: "No leads yet.",
+          monitoring: "Visitor actions",
         };
 
   return (
@@ -46,6 +52,16 @@ export function MainView() {
         <h1 className="mt-2 text-4xl font-black tracking-tight text-brand-700">{labels.title}</h1>
         <p className="mt-2 max-w-xl text-sm text-slate-600">{labels.subtitle}</p>
       </header>
+
+      {/* ── Visitor actions on the site for the selected period ── */}
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-brand-700/70">{labels.monitoring}</h2>
+          <PeriodPicker period={period} onChange={setPeriod} />
+        </div>
+        <MonitoringPanel period={period} />
+        <ActivityChart period={period} />
+      </section>
 
       <LeadsChart />
       <StatsBar />

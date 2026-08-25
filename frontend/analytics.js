@@ -144,6 +144,64 @@
   loader.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(MEASUREMENT_ID);
   document.head.appendChild(loader);
 
+  /* ------------------------------------- первая сторона: свой бэкенд */
+  // Ключевые действия дублируются в собственную базу (таблица SiteEvent),
+  // чтобы дашборд админки показывал живые цифры без Google Analytics.
+  // Хранится только случайный visitor-токен — никакой персональной информации.
+
+  // То же правило выбора адреса API, что в app.js: явный <meta> → localhost
+  // при локальной работе → same-origin /api/v1 в проде (за Caddy).
+  var API_BASE = (function () {
+    var explicit = document.querySelector('meta[name="jetsonic-api"]');
+    if (explicit && explicit.content) return explicit.content.replace(/\/+$/, '');
+    var cms = document.querySelector('meta[name="cms-api"]');
+    if (cms && cms.content) return cms.content.replace(/\/+$/, '');
+    var host = location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000/api/v1';
+    return '/api/v1';
+  })();
+
+  var LS_VISITOR = 'jetsonicVisitorId';
+
+  function visitorId() {
+    var id = readStore('localStorage', LS_VISITOR);
+    if (!id) {
+      id = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+      writeStore('localStorage', LS_VISITOR, id);
+    }
+    return id;
+  }
+
+  function sendSiteEvent(type) {
+    // Внутренние устройства (?ga_internal=1) в дашборд не попадают вовсе:
+    // в отличие от GA4, у своей базы нет фильтра на стороне отчётов.
+    if (internalTraffic) return;
+    try {
+      fetch(API_BASE + '/events/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+          type: type,
+          page: clean(path, 200) || '/',
+          visitorId: visitorId()
+        })
+      })['catch'](function () {});
+    } catch (e) {}
+  }
+
+  // Какие GA-события зеркалируются в свою базу. Остальные (прокрутка,
+  // секции, навигация) остаются только в GA4 — дашборду нужны обращения.
+  var FIRST_PARTY = {
+    whatsapp_click: 'WHATSAPP',
+    phone_click: 'CALL',
+    email_click: 'EMAIL',
+    form_start: 'FORM_START',
+    generate_lead: 'RFQ_SUBMIT'
+  };
+
   /* ------------------------------------------------------ отправка событий */
 
   var fired = Object.create(null);
@@ -172,6 +230,8 @@
     payload.page_language = language;
     if (internalTraffic) payload.traffic_type = 'internal';
     gtag('event', name, payload);
+
+    if (FIRST_PARTY[name]) sendSiteEvent(FIRST_PARTY[name]);
   }
 
   // Доступно из кода страниц и из блоков, добавленных через CMS.
@@ -495,6 +555,9 @@
   }
 
   /* ------------------------------------------------------------------ старт */
+
+  // Просмотр страницы — в свою базу; служебные страницы не считаются визитами.
+  if (pageType !== 'thank_you' && pageType !== 'not_found') sendSiteEvent('PAGE_VIEW');
 
   initScrollDepth();
   initSectionViews();

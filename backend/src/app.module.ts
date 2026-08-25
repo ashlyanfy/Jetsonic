@@ -9,6 +9,7 @@ import { PagesModule } from './pages/pages.module';
 import { UsersModule } from './users/users.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SettingsModule } from './settings/settings.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SettingsModule } from './settings/settings.module';
     UsersModule,
     NotificationsModule,
     SettingsModule,
+    EventsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

@@ -34,8 +34,15 @@ export class TelegramService implements OnModuleInit {
 
   /** Returns chat ID from DB (set via admin panel) or falls back to env var */
   private async resolveChatId(): Promise<string> {
-    const fromDb = await this.settingsService.get(SETTING_KEYS.TELEGRAM_CHAT_ID);
-    if (fromDb && fromDb.trim()) return fromDb.trim();
+    // A settings lookup failure must not kill the notification: for three
+    // months every Telegram send died here on a missing table. Fall back to
+    // the env var and let the message go out.
+    try {
+      const fromDb = await this.settingsService.get(SETTING_KEYS.TELEGRAM_CHAT_ID);
+      if (fromDb && fromDb.trim()) return fromDb.trim();
+    } catch (err) {
+      this.logger.warn(`Settings lookup failed, using TELEGRAM_CHAT_ID env fallback: ${(err as Error).message.split('\n')[0]}`);
+    }
     return process.env.TELEGRAM_CHAT_ID ?? '';
   }
 
